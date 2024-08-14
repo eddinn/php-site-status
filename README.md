@@ -16,4 +16,4 @@ Add URLs to the array:
 ```
 
 Example of rendered page:
-<img style="display: block; margin: auto;" alt="Landing page example" src="img/image.png"/>
+<img style="float: left; margin: auto;" alt="Landing page example" src="img/image.png"/>
