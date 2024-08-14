@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landing page</title>
     <style>
+        * {
+            font-family: Helvetica, Arial, sans-serif
+          }
         .online {
             color: green;
             font-weight: bold;
@@ -16,7 +19,7 @@
     </style>
 </head>
 <body>
-    <h1>Landing page</h1>
+    <h2>Landing page</h2>
     <ul>
         <?php
         // Array of URLs to check
