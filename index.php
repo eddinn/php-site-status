@@ -5,6 +5,16 @@ $services_file = 'services.json';
 $services = file_exists($services_file) ? json_decode(file_get_contents($services_file), true) : [];
 
 $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
+
+$lastLogin = $lastIp = null;
+if ($is_logged_in) {
+    $users_file = __DIR__ . '/../secure/users.json';
+    if (file_exists($users_file)) {
+        $userData = json_decode(file_get_contents($users_file), true)['admin'] ?? [];
+        $lastLogin = $userData['last_login'] ?? null;
+        $lastIp = $userData['last_ip'] ?? null;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +67,12 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 
         <!-- Footer -->
         <footer class="bg-light text-center py-3 mt-5 border-top">
-            <small>Version 1.0 — <?= date("Y-m-d") ?></small>
+            <small>
+                Version 1.0 — <?= date("Y-m-d") ?>
+                <?php if ($is_logged_in && $lastLogin): ?>
+                    — Last login: <?= h($lastLogin) ?> from <?= h($lastIp) ?>
+                <?php endif; ?>
+            </small>
         </footer>
     </div>
 </div>
