@@ -22,41 +22,40 @@ body {
 }
 
 .bg-online {
-    background-color: #d4edda !important;
+    background-color: rgba(40, 167, 69, 0.08) !important;
 }
-
 .bg-offline {
-    background-color: #f8d7da !important;
+    background-color: rgba(220, 53, 69, 0.08) !important;
 }
 
 /* Dark mode overrides */
 body.dark-mode {
-    background-color: #121212;
-    color: #f1f1f1;
+    background-color: #1e1e2e;
+    color: #e0e0e0;
 }
 
 body.dark-mode .card {
-    background-color: #1e1e1e;
-    color: #f1f1f1;
-    border-color: #333;
+    background-color: #282c34;
+    border-color: #3c3f4a;
+    color: #e0e0e0;
 }
 
 body.dark-mode .card-header {
-    background-color: #2c2c2c;
-    border-color: #444;
+    background-color: #323644;
+    border-bottom: 1px solid #454954;
 }
 
 body.dark-mode .list-group-item {
-    background-color: #1a1a1a;
-    border-color: #333;
+    background-color: #242730;
+    border-color: #3c3f4a;
 }
 
 body.dark-mode .bg-online {
-    background-color: #295f38 !important;
+    background-color: rgba(72, 170, 102, 0.15) !important;
 }
 
 body.dark-mode .bg-offline {
-    background-color: #712b2b !important;
+    background-color: rgba(200, 80, 80, 0.15) !important;
 }
 
 body.dark-mode a {

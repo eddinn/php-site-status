@@ -123,10 +123,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     offlineToggle.addEventListener("click", () => {
         showOnlyOffline = !showOnlyOffline;
-        offlineToggle.classList.toggle("btn-danger", !showOnlyOffline);
-        offlineToggle.classList.toggle("btn-secondary", showOnlyOffline);
+        offlineToggle.classList.toggle("btn-outline-danger", !showOnlyOffline);
+        offlineToggle.classList.toggle("btn-outline-secondary", showOnlyOffline);
+        offlineToggle.innerText = showOnlyOffline ? "Show All Services" : "Show Only Offline";
         updateStatus();
-    });
+    });    
 
     exportJsonBtn.addEventListener("click", () => exportData(false));
     exportMdBtn.addEventListener("click", () => exportData(true));
