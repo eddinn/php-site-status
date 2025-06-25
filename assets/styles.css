@@ -2,6 +2,8 @@
 body {
     font-family: Helvetica, Arial, sans-serif;
     transition: background-color 0.3s, color 0.3s;
+    padding: 0;
+    margin: 0;
 }
 
 /* Light Mode */
@@ -68,10 +70,18 @@ body {
 .card {
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    font-weight: bold;
+    font-size: 1.1rem;
 }
 
 .list-group-item {
     transition: background-color 0.2s ease;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
 }
 
 /* Tint adjustments */
@@ -83,7 +93,7 @@ body {
     background-color: rgba(220, 53, 69, 0.12) !important;
 }
 
-/* Sidebar (if used) */
+/* Sidebar */
 .sidebar {
     min-width: 220px;
     background-color: #343a40;
@@ -92,8 +102,60 @@ body {
     position: fixed;
 }
 
+.sidebar a.nav-link {
+    color: #e0e0e0;
+}
+
+.sidebar a.nav-link:hover {
+    background-color: #495057;
+    border-radius: 5px;
+}
+
 /* Footer */
 footer {
     font-size: 0.875rem;
     color: #999;
+}
+
+/* Drag Handle Icon */
+.drag-handle {
+    cursor: grab;
+    user-select: none;
+}
+
+/* Group grid layout */
+#service-dashboard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+/* Group column card wrapper (half-width) */
+.group-card {
+    flex: 1 1 48%;
+    min-width: 300px;
+}
+
+/* Login + Form alignment */
+form .form-label {
+    font-weight: 500;
+}
+
+.alert code {
+    background-color: rgba(0, 0, 0, 0.05);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 90%;
+}
+
+/* Optional polish */
+@media (max-width: 768px) {
+    .group-card {
+        flex: 1 1 100%;
+    }
+
+    .sidebar {
+        position: relative;
+        height: auto;
+    }
 }

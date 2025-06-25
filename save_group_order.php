@@ -1,11 +1,13 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
 header('Content-Type: application/json');
+require_login();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user']) || $_SESSION['user'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
     exit;
 }
 
@@ -13,38 +15,50 @@ $data = json_decode(file_get_contents('php://input'), true);
 $csrf = $data['csrf'] ?? '';
 $order = $data['order'] ?? [];
 
-if (!validate_csrf($csrf) || !is_array($order)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid request']);
+if (!validate_csrf($csrf)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
     exit;
 }
 
-$services_file = 'services.json';
-if (!file_exists($services_file)) {
+if (!is_array($order)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid order format']);
+    exit;
+}
+
+if (!file_exists(SERVICES_FILE)) {
+    http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Missing services file']);
     exit;
 }
 
-$existing = json_decode(file_get_contents($services_file), true);
+$existing = json_decode(file_get_contents(SERVICES_FILE), true);
+if (!is_array($existing)) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'Corrupt services data']);
+    exit;
+}
+
 $reordered = [];
 
-// Preserve only existing groups in new order
+// Preserve known groups in submitted order
 foreach ($order as $group) {
-    if (array_key_exists($group, $existing)) {
+    if (isset($existing[$group])) {
         $reordered[$group] = $existing[$group];
     }
 }
 
-// Append any leftover groups not in drag list
+// Append unlisted groups
 foreach ($existing as $group => $items) {
-    if (!array_key_exists($group, $reordered)) {
+    if (!isset($reordered[$group])) {
         $reordered[$group] = $items;
     }
 }
 
-if (file_put_contents($services_file, json_encode($reordered, JSON_PRETTY_PRINT)) === false) {
+if (file_put_contents(SERVICES_FILE, json_encode($reordered, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to save file']);
+    echo json_encode(['success' => false, 'error' => 'Failed to write services file']);
     exit;
 }
 

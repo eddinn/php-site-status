@@ -6,8 +6,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const exportJson = document.getElementById("export-json");
 
     const isAdmin = document.body.dataset.admin === "1";
+    const csrf = document.querySelector("meta[name='csrf']").content;
 
-    let darkMode = false;
+    let darkMode = localStorage.getItem("darkMode") === "true";
     let showOnlyOffline = false;
     let serviceData = {};
     let statusCache = {};
@@ -16,6 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.body.classList.toggle("dark-mode", enabled);
         document.body.classList.toggle("light-mode", !enabled);
         darkToggle.textContent = enabled ? "🌞 Light Mode" : "🌓 Dark Mode";
+        localStorage.setItem("darkMode", enabled);
         darkMode = enabled;
     }
 
@@ -30,22 +32,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function render() {
         dashboard.innerHTML = "";
-        for (const [group, urls] of Object.entries(serviceData)) {
+
+        Object.entries(serviceData).forEach(([group, urls], groupIndex) => {
+            const groupCol = document.createElement("div");
+            groupCol.className = "col-md-6 group-card";
+            groupCol.dataset.group = group;
+
             const groupCard = document.createElement("div");
-            groupCard.className = "card mb-4";
-            groupCard.innerHTML = `<div class="card-header"><strong>${group}</strong></div>`;
+            groupCard.className = "card h-100";
+            groupCard.innerHTML = `<div class="card-header"><strong class="drag-handle">☰ ${group}</strong></div>`;
+
             const list = document.createElement("ul");
-            list.className = "list-group list-group-flush";
+            list.className = "list-group list-group-flush sortable-services";
+            list.dataset.group = group;
 
             urls.forEach((url, index) => {
                 const status = statusCache[url];
                 const isOffline = status && !status.online;
-
                 if (showOnlyOffline && (!status || status.online)) return;
 
                 const name = status?.title?.trim() || getFallbackName(url);
                 const item = document.createElement("li");
                 item.className = `list-group-item d-flex justify-content-between align-items-center ${status ? (status.online ? "bg-success bg-opacity-10" : "bg-danger bg-opacity-10") : ""}`;
+                item.dataset.url = url;
 
                 const linkHtml = `
                     <span class="me-2 ${status ? (status.online ? "text-success" : "text-danger") : ""}">●</span>
@@ -63,13 +72,29 @@ document.addEventListener("DOMContentLoaded", async () => {
                     </div>
                     <div>${editBtn}</div>
                 `;
-
-                item.setAttribute("data-url", url);
                 list.appendChild(item);
             });
 
             groupCard.appendChild(list);
-            dashboard.appendChild(groupCard);
+            groupCol.appendChild(groupCard);
+            dashboard.appendChild(groupCol);
+
+            if (isAdmin) {
+                new Sortable(list, {
+                    animation: 150,
+                    handle: ".drag-handle",
+                    onEnd: () => saveGroupOrder(group, list)
+                });
+            }
+        });
+
+        if (isAdmin) {
+            new Sortable(dashboard, {
+                animation: 200,
+                handle: ".drag-handle",
+                draggable: ".group-card",
+                onEnd: () => saveGroupLayout()
+            });
         }
     }
 
@@ -98,6 +123,24 @@ document.addEventListener("DOMContentLoaded", async () => {
         Promise.all(checks).then(render);
     }
 
+    function saveGroupLayout() {
+        const order = Array.from(dashboard.querySelectorAll(".group-card")).map(col => col.dataset.group);
+        fetch("save_group_order.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ csrf, order })
+        });
+    }
+
+    function saveGroupOrder(group, listEl) {
+        const urls = Array.from(listEl.children).map(li => li.dataset.url);
+        fetch("save_sort_order.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ csrf, group, order: urls })
+        });
+    }
+
     darkToggle.onclick = () => {
         setDarkMode(!darkMode);
     };
@@ -116,7 +159,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             output += `## ${group}\n`;
             urls.forEach(url => {
                 const status = statusCache[url];
-                output += `- ${status?.online ? "✅" : "❌"} [${url}](${url})\n`;
+                const name = status?.title || getFallbackName(url);
+                output += `- ${status?.online ? "✅" : "❌"} [${name}](${url})\n`;
             });
             output += "\n";
         }
@@ -143,4 +187,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     } catch (e) {
         dashboard.innerHTML = "<div class='alert alert-danger'>Failed to load services.</div>";
     }
+
+    setDarkMode(darkMode);
 });

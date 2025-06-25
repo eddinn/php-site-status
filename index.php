@@ -4,14 +4,7 @@ require_once 'config.php';
 
 $services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
 
-$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === DEFAULT_USER;
-
-$lastLogin = $lastIp = null;
-if ($is_logged_in && file_exists(USERS_FILE)) {
-    $userData = json_decode(file_get_contents(USERS_FILE), true)[DEFAULT_USER] ?? [];
-    $lastLogin = $userData['last_login'] ?? null;
-    $lastIp = $userData['last_ip'] ?? null;
-}
+$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 ?>
 
 <!DOCTYPE html>
@@ -28,9 +21,9 @@ if ($is_logged_in && file_exists(USERS_FILE)) {
 </head>
 <body class="light-mode" data-admin="<?= $is_logged_in ? '1' : '0' ?>">
 
-<!-- Sidebar -->
 <div class="d-flex">
-    <div class="bg-dark text-white p-3" style="min-width: 220px; height: 100vh;">
+    <!-- Sidebar -->
+    <div class="bg-dark text-white p-3 sidebar">
         <h4 class="mb-4">Menu</h4>
         <ul class="nav flex-column gap-2">
             <li class="nav-item"><a class="nav-link text-white" href="index.php">Dashboard</a></li>
@@ -44,6 +37,7 @@ if ($is_logged_in && file_exists(USERS_FILE)) {
         </ul>
     </div>
 
+    <!-- Main Content -->
     <div class="flex-fill">
         <!-- Topbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
@@ -57,19 +51,17 @@ if ($is_logged_in && file_exists(USERS_FILE)) {
             </div>
         </nav>
 
-        <div class="container-fluid p-4" id="service-dashboard">
+        <!-- Dashboard -->
+        <div class="container-fluid p-4">
             <h2 class="mb-4">Service Status</h2>
-            <!-- Cards dynamically populated by dashboard.js -->
+            <div id="service-dashboard" class="row gy-4 sortable-groups">
+                <!-- Group cards injected here -->
+            </div>
         </div>
 
         <!-- Footer -->
         <footer class="bg-light text-center py-3 mt-5 border-top">
-            <small>
-                Version <?= APP_VERSION ?> — <?= date("Y-m-d") ?>
-                <?php if ($is_logged_in && $lastLogin): ?>
-                    — Last login: <?= h($lastLogin) ?> from <?= h($lastIp) ?>
-                <?php endif; ?>
-            </small>
+            <small>Version <?= h(APP_VERSION) ?> — <?= date("Y-m-d") ?></small>
         </footer>
     </div>
 </div>

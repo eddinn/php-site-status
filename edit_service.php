@@ -1,35 +1,38 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
-if (!is_logged_in()) {
-    header("Location: login.php");
-    exit;
-}
+require_login();
 
-$services_file = 'services.json';
-$services = file_exists($services_file) ? json_decode(file_get_contents($services_file), true) : [];
+$services = file_exists(SERVICES_FILE)
+    ? json_decode(file_get_contents(SERVICES_FILE), true)
+    : [];
 
-$group = $_GET['group'] ?? '';
-$index = $_GET['index'] ?? null;
-
-if (!isset($services[$group]) || !is_numeric($index) || !isset($services[$group][$index])) {
-    http_response_code(404);
-    exit("Service not found.");
-}
-
-$original_url = $services[$group][$index];
+$error = '';
+$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    verify_csrf_token();
-
-    $new_url = trim($_POST['url'] ?? '');
-    if (!filter_var($new_url, FILTER_VALIDATE_URL)) {
-        $error = "Invalid URL";
+    if (!validate_csrf($_POST['csrf'] ?? '')) {
+        $error = "Invalid request token.";
     } else {
-        $services[$group][$index] = $new_url;
-        file_put_contents($services_file, json_encode($services, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        header("Location: index.php");
-        exit;
+        $raw_json = trim($_POST['services_json'] ?? '');
+        $decoded = json_decode($raw_json, true);
+
+        if (!is_array($decoded)) {
+            $error = "Invalid JSON format.";
+        } else {
+            // Create a timestamped backup before saving
+            $timestamp = date('Ymd_His');
+            $backup_path = dirname(SERVICES_FILE) . '/services_backup_' . $timestamp . '.json';
+            if (!copy(SERVICES_FILE, $backup_path)) {
+                $error = "Failed to create backup.";
+            } elseif (file_put_contents(SERVICES_FILE, json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+                $error = "Failed to write updated services.";
+            } else {
+                $services = $decoded;
+                $success = "Service configuration updated successfully.";
+            }
+        }
     }
 }
 ?>
@@ -38,28 +41,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Service</title>
+    <title>Edit Services (Raw JSON)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="assets/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="light-mode">
-<div class="container py-5">
-    <h2>Edit Service</h2>
 
-    <?php if (isset($error)): ?>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
+    <span class="navbar-brand">Edit JSON</span>
+    <div class="ms-auto">
+        <a href="index.php" class="btn btn-sm btn-outline-light">← Back</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h3>Edit Service Groups JSON</h3>
+
+    <?php if ($error): ?>
         <div class="alert alert-danger"><?= h($error) ?></div>
+    <?php elseif ($success): ?>
+        <div class="alert alert-success"><?= h($success) ?></div>
     <?php endif; ?>
 
-    <form method="POST">
-        <input type="hidden" name="csrf_token" value="<?= h(csrf_token()) ?>">
-
+    <form method="post">
+        <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
         <div class="mb-3">
-            <label for="url" class="form-label">Service URL</label>
-            <input type="url" name="url" id="url" class="form-control" required value="<?= h($original_url) ?>">
+            <textarea name="services_json" class="form-control" rows="20"><?= h(json_encode($services, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) ?></textarea>
         </div>
-
-        <button type="submit" class="btn btn-primary">Save</button>
-        <a href="index.php" class="btn btn-secondary">Cancel</a>
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">💾 Save</button>
+            <a href="index.php" class="btn btn-secondary">Cancel</a>
+        </div>
     </form>
 </div>
+
+<footer class="text-center py-3 border-top bg-light mt-5">
+    <small>Version <?= h(APP_VERSION) ?> — <?= date("Y-m-d") ?></small>
+</footer>
+
 </body>
 </html>

@@ -1,28 +1,34 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
 header('Content-Type: application/json');
+require_login();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['user']) || $_SESSION['user'] !== 'admin') {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(['success' => false, 'error' => 'Invalid request method']);
     exit;
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
-
 $csrf = $data['csrf'] ?? '';
 $group = $data['group'] ?? '';
 $order = $data['order'] ?? [];
 
-if (!validate_csrf($csrf) || !$group || !is_array($order)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid request']);
+if (!validate_csrf($csrf)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
     exit;
 }
 
-$services_file = 'services.json';
-$services = file_exists($services_file) ? json_decode(file_get_contents($services_file), true) : [];
+if (!$group || !is_array($order)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid group or order format']);
+    exit;
+}
+
+$services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
 
 if (!isset($services[$group])) {
     http_response_code(404);
@@ -30,12 +36,12 @@ if (!isset($services[$group])) {
     exit;
 }
 
-// Overwrite order of URLs in group
-$services[$group] = $order;
+// Overwrite service order within the group
+$services[$group] = array_values($order);  // Reindex array for consistency
 
-if (file_put_contents($services_file, json_encode($services, JSON_PRETTY_PRINT)) === false) {
+if (file_put_contents(SERVICES_FILE, json_encode($services, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to save']);
+    echo json_encode(['success' => false, 'error' => 'Failed to write services file']);
     exit;
 }
 
