@@ -3,13 +3,12 @@ require_once 'init.php';
 
 $users_file = 'users.json';
 
-// Block access if not logged in
-if (!isset($_SESSION['user'])) {
+// Require login
+if (!isset($_SESSION['user']) || $_SESSION['user'] !== 'admin') {
     header("Location: login.php");
     exit;
 }
 
-$username = $_SESSION['user'];
 $users = json_decode(file_get_contents($users_file), true);
 $error = '';
 $success = '';
@@ -26,13 +25,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($newpass !== $confirm) {
             $error = "Passwords do not match.";
         } else {
-            $users[$username]['password'] = password_hash($newpass, PASSWORD_DEFAULT);
-            $users[$username]['force_password_change'] = false;
+            $users['admin']['password'] = password_hash($newpass, PASSWORD_DEFAULT);
+            $users['admin']['force_password_change'] = false;
 
             if (file_put_contents($users_file, json_encode($users, JSON_PRETTY_PRINT)) === false) {
                 $error = "Failed to save new password.";
             } else {
-                $success = "Password changed. Redirecting...";
+                $success = "Password updated successfully. Redirecting...";
                 header("Refresh:2; URL=edit_services.php");
             }
         }
@@ -44,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Change Password</title>
+    <title>Change Password – Homelab Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="d-flex justify-content-center align-items-center vh-100 bg-light">
@@ -62,7 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
             <input type="password" name="confirm" placeholder="Confirm Password" required class="form-control" autocomplete="new-password">
         </div>
-        <button type="submit" class="btn btn-success w-100">Change Password</button>
+        <button type="submit" class="btn btn-success w-100">Update Password</button>
+        <div class="mt-3 text-muted small">
+            <p>Locked out? You can manually reset the password by editing <code>users.json</code> on the server.</p>
+            <p>Use <code>php -r "echo password_hash('newpass', PASSWORD_DEFAULT);"</code> to generate a new hash.</p>
+        </div>
     </form>
 </body>
 </html>
