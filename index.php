@@ -2,69 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing page</title>
-    <style>
-        * {
-            font-family: Helvetica, Arial, sans-serif
-          }
-        .online {
-            color: green;
-            font-weight: bold;
-        }
-        .offline {
-            color: red;
-            font-weight: bold;
-        }
-    </style>
+    <title>Homelab Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/styles.css" rel="stylesheet">
 </head>
 <body>
-    <h2>Landing page</h2>
-    <ul>
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Homelab Dashboard</h2>
+        <div>
+            <label class="form-label me-2 mb-0">Auto-refresh:</label>
+            <select id="refreshInterval" class="form-select d-inline-block w-auto me-3">
+                <option value="0">Off</option>
+                <option value="10000">Every 10s</option>
+                <option value="30000" selected>Every 30s</option>
+                <option value="60000">Every 60s</option>
+            </select>
+
+            <button id="darkToggle" class="btn btn-outline-secondary">Toggle Dark Mode</button>
+            <button id="offlineToggle" class="btn btn-outline-danger ms-2">Show Only Offline</button>
+        </div>
+    </div>
+
+    <div class="row" id="dashboard">
         <?php
-        // Array of URLs to check
-        $urls = [
-            "http://www.google.com",
-            "http://example.com:7878",
-            "http://123.123.123.123:8080",
-            "http://192.168.0.22:9117/path",
-            // Add more URLs as needed
-        ];
+        $json = file_get_contents('services.json');
+        $groups = json_decode($json, true);
 
-        // Function to check if a URL is online and fetch the page title using cURL
-        function checkUrl($url) {
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15); // Timeout after 15 seconds
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Bypass SSL verification
-            curl_setopt($ch, CURLOPT_HEADER, true); // Include header in the output
-            curl_setopt($ch, CURLOPT_NOBODY, false); // Fetch the body to extract the title
-            $response = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $title = "No Title Found";
-
-            // Extract title from the HTML content if the status is OK
-            if ($http_code === 200) {
-                if (preg_match("/<title>(.*?)<\/title>/i", $response, $matches)) {
-                    $title = $matches[1];
-                }
+        foreach ($groups as $group => $urls) {
+            $group_id = preg_replace('/[^a-z0-9]/i', '_', $group);
+            echo "<div class='col-md-6 mb-4 group-card' data-group='$group_id'>";
+            echo "<div class='card'><div class='card-header d-flex justify-content-between align-items-center'>";
+            echo "<span>$group</span><span class='badge bg-secondary' id='{$group_id}_badge'>0 / " . count($urls) . "</span>";
+            echo "</div><ul class='list-group list-group-flush'>";
+            foreach ($urls as $index => $url) {
+                $service_id = "{$group_id}_service_$index";
+                echo "<li class='list-group-item service-item' id='{$service_id}' data-group='{$group_id}' data-url='$url'>";
+                echo "<span class='status-dot bg-secondary'></span> <strong>Loading...</strong><br>";
+                echo "<a href='$url' target='_blank'>$url</a>";
+                echo "</li>";
             }
-
-            curl_close($ch);
-
-            return [$http_code === 200, $title];
-        }
-
-        // Loop through each URL and check its status
-        foreach ($urls as $url) {
-            list($is_online, $title) = checkUrl($url);
-            $status = $is_online ? 'online' : 'offline';
-            $status_text = ucfirst($status);
-
-            echo "<li><strong>$title:</strong> <a href=\"$url\" target=\"_blank\">$url</a> - <span class=\"$status\">$status_text</span></li>";
+            echo "</ul></div></div>";
         }
         ?>
-    </ul>
+    </div>
+</div>
+
+<script src="assets/script.js"></script>
 </body>
 </html>
