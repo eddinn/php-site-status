@@ -20,7 +20,6 @@ if (!validate_csrf($csrf)) {
     echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
     exit;
 }
-
 if (!is_array($order)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'error' => 'Invalid order format']);
@@ -34,32 +33,21 @@ if (!file_exists(SERVICES_FILE)) {
 }
 
 $existing = json_decode(file_get_contents(SERVICES_FILE), true);
-if (!is_array($existing)) {
-    http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Corrupt services data']);
-    exit;
-}
-
 $reordered = [];
 
-// Preserve known groups in submitted order
 foreach ($order as $group) {
     if (isset($existing[$group])) {
         $reordered[$group] = $existing[$group];
     }
 }
-
-// Append unlisted groups
-foreach ($existing as $group => $items) {
-    if (!isset($reordered[$group])) {
-        $reordered[$group] = $items;
+foreach ($existing as $g => $items) {
+    if (!isset($reordered[$g])) {
+        $reordered[$g] = $items;
     }
 }
-
 if (file_put_contents(SERVICES_FILE, json_encode($reordered, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Failed to write services file']);
     exit;
 }
-
 echo json_encode(['success' => true]);

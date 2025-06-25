@@ -21,28 +21,23 @@ if (!validate_csrf($csrf)) {
     echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
     exit;
 }
-
 if (!$group || !is_array($order)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid group or order format']);
+    echo json_encode(['success' => false, 'error' => 'Invalid input']);
     exit;
 }
 
 $services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
-
 if (!isset($services[$group])) {
     http_response_code(404);
     echo json_encode(['success' => false, 'error' => 'Group not found']);
     exit;
 }
 
-// Overwrite service order within the group
-$services[$group] = array_values($order);  // Reindex array for consistency
-
+$services[$group] = array_values($order);
 if (file_put_contents(SERVICES_FILE, json_encode($services, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Failed to write services file']);
+    echo json_encode(['success' => false, 'error' => 'Failed to write file']);
     exit;
 }
-
 echo json_encode(['success' => true]);
