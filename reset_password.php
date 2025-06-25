@@ -31,7 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body class="light-mode d-flex justify-content-center align-items-center vh-100">
 
-<div class="card shadow p-4" style="max-width: 400px; width: 100%;">
+<div class="card shadow p-4" style="max-width: 450px; width: 100%;">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="login.php">Login</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Reset Password</li>
+        </ol>
+    </nav>
+
     <h4 class="mb-3 text-center">🔁 Reset Admin Password</h4>
 
     <?php if ($success): ?>

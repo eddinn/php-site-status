@@ -52,6 +52,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="light-mode d-flex justify-content-center align-items-center vh-100">
 
 <div class="card shadow-sm p-4" style="min-width: 350px; max-width: 460px;">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Change Password</li>
+        </ol>
+    </nav>
+
     <h4 class="mb-3 text-center">🔐 Change Admin Password</h4>
 
     <?php if ($error): ?>
