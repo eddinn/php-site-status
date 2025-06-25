@@ -1,7 +1,6 @@
 <?php
 require_once 'init.php';
 
-$users_file = __DIR__ . '/../secure/users.json';
 $services_file = 'services.json';
 $backup_file = 'services_backup_' . date('Ymd_His') . '.json';
 

@@ -1,59 +1,66 @@
 <?php
 require_once 'init.php';
+
+$services_file = 'services.json';
+$services = file_exists($services_file) ? json_decode(file_get_contents($services_file), true) : [];
+
+$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Homelab Dashboard</title>
+    <title>Service Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf" content="<?= h(csrf_token()) ?>">
+    <link rel="stylesheet" href="assets/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="assets/dashboard.js" defer></script>
 </head>
-<body>
-<div class="container my-4">
-    <?php if (!isset($_SESSION['user'])): ?>
-        <div class="alert alert-warning text-center">
-            You are not logged in. <a href="login.php" class="btn btn-sm btn-primary ms-2">Log in here</a>
-        </div>
-    <?php endif; ?>
+<body class="light-mode">
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2 class="mb-0">Homelab Dashboard</h2>
-        <div>
-            <label class="form-label me-2 mb-0">Auto-refresh:</label>
-            <select id="refreshInterval" class="form-select d-inline-block w-auto me-3">
-                <option value="0">Off</option>
-                <option value="10000">Every 10s</option>
-                <option value="30000" selected>Every 30s</option>
-                <option value="60000">Every 60s</option>
-            </select>
-            <button id="darkToggle" class="btn btn-outline-secondary">Toggle Dark Mode</button>
-            <button id="offlineToggle" class="btn btn-outline-danger ms-2">Show Only Offline</button>
-        </div>
+<!-- Sidebar -->
+<div class="d-flex">
+    <div class="bg-dark text-white p-3" style="min-width: 220px; height: 100vh;">
+        <h4 class="mb-4">Menu</h4>
+        <ul class="nav flex-column gap-2">
+            <li class="nav-item"><a class="nav-link text-white" href="index.php">Dashboard</a></li>
+            <?php if ($is_logged_in): ?>
+                <li class="nav-item"><a class="nav-link text-white" href="manage_services.php">Manage Services</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="edit_services.php">Edit JSON</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="logout.php">Logout</a></li>
+            <?php else: ?>
+                <li class="nav-item"><a class="nav-link text-white" href="login.php">Login</a></li>
+            <?php endif; ?>
+        </ul>
     </div>
 
-    <div class="row" id="dashboard">
-        <?php
-        $groups = json_decode(file_get_contents('services.json'), true);
-        foreach ($groups as $group => $urls) {
-            $group_id = preg_replace('/[^a-z0-9]/i', '_', $group);
-            echo "<div class='col-md-6 mb-4 group-card' data-group='$group_id'>";
-            echo "<div class='card'><div class='card-header d-flex justify-content-between align-items-center'>";
-            echo "<span>" . h($group) . "</span><span class='badge bg-secondary' id='{$group_id}_badge'>0 / " . count($urls) . "</span>";
-            echo "</div><ul class='list-group list-group-flush'>";
-            foreach ($urls as $index => $url) {
-                $service_id = "{$group_id}_service_$index";
-                echo "<li class='list-group-item service-item' id='{$service_id}' data-group='{$group_id}' data-url='" . h($url) . "'>";
-                echo "<span class='status-dot bg-secondary'></span> <strong>Loading...</strong><br>";
-                echo "<a href='" . h($url) . "' target='_blank'>" . h($url) . "</a>";
-                echo "</li>";
-            }
-            echo "</ul></div></div>";
-        }
-        ?>
+    <div class="flex-fill">
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
+            <span class="navbar-brand">Homelab Services</span>
+            <div class="ms-auto d-flex gap-2">
+                <button id="toggle-dark" class="btn btn-sm btn-outline-light">🌓 Dark Mode</button>
+                <button id="toggle-offline" class="btn btn-sm btn-outline-light">🔴 Show Offline</button>
+                <button id="export-md" class="btn btn-sm btn-outline-light">📄 Export MD</button>
+                <button id="export-json" class="btn btn-sm btn-outline-light">🔧 Export JSON</button>
+                <button onclick="location.reload()" class="btn btn-sm btn-outline-light">🔄 Refresh</button>
+            </div>
+        </nav>
+
+        <div class="container-fluid p-4" id="service-dashboard">
+            <h2 class="mb-4">Service Status</h2>
+            <!-- Cards dynamically populated by dashboard.js -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-light text-center py-3 mt-5 border-top">
+            <small>Version 1.0 — <?= date("Y-m-d") ?></small>
+        </footer>
     </div>
 </div>
-<script src="assets/script.js"></script>
+
 </body>
 </html>

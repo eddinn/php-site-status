@@ -1,63 +1,66 @@
 body {
     font-family: Helvetica, Arial, sans-serif;
-    background-color: #f8f9fa;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.light-mode {
+    background-color: #f5f5f5;
     color: #212529;
-    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.status-dot {
-    height: 10px;
-    width: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-}
-
-.dot-online {
-    background-color: #28a745;
-}
-
-.dot-offline {
-    background-color: #dc3545;
-}
-
-.bg-online {
-    background-color: rgba(40, 167, 69, 0.08) !important;
-}
-.bg-offline {
-    background-color: rgba(220, 53, 69, 0.08) !important;
-}
-
-/* Dark mode overrides */
-body.dark-mode {
-    background-color: #1e1e2e;
+.dark-mode {
+    background-color: #121212;
     color: #e0e0e0;
 }
 
-body.dark-mode .card {
-    background-color: #282c34;
-    border-color: #3c3f4a;
-    color: #e0e0e0;
+.dark-mode .navbar,
+.dark-mode .card-header,
+.dark-mode .bg-light,
+.dark-mode .form-control,
+.dark-mode .table {
+    background-color: #1e1e1e !important;
+    color: #e0e0e0 !important;
 }
 
-body.dark-mode .card-header {
-    background-color: #323644;
-    border-bottom: 1px solid #454954;
+.dark-mode .table thead th {
+    background-color: #2a2a2a !important;
 }
 
-body.dark-mode .list-group-item {
-    background-color: #242730;
-    border-color: #3c3f4a;
+.dark-mode .btn-outline-light {
+    border-color: #888;
+    color: #eee;
 }
 
-body.dark-mode .bg-online {
-    background-color: rgba(72, 170, 102, 0.15) !important;
+.dark-mode .btn-outline-light:hover {
+    background-color: #333;
 }
 
-body.dark-mode .bg-offline {
-    background-color: rgba(200, 80, 80, 0.15) !important;
+.card {
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-body.dark-mode a {
-    color: #8ab4f8;
+.list-group-item {
+    transition: background-color 0.2s ease;
+}
+
+.bg-success.bg-opacity-10 {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+}
+
+.bg-danger.bg-opacity-10 {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+
+.sidebar {
+    min-width: 220px;
+    background-color: #343a40;
+    color: white;
+    height: 100vh;
+    position: fixed;
+}
+
+footer {
+    font-size: 0.875rem;
+    color: #666;
 }
