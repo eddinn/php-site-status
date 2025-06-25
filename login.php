@@ -29,15 +29,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_regenerate_id(true);
             $_SESSION['user'] = $user;
 
-            // Last login tracking
-            if (!isset($users[$user]['last_login'])) {
+            // Last login tracking (safe array handling)
+            if (!isset($users[$user]['last_login']) || !is_array($users[$user]['last_login'])) {
                 $users[$user]['last_login'] = [];
             }
+
             $users[$user]['last_login'][] = [
                 'timestamp' => date('Y-m-d H:i:s'),
                 'ip' => $_SERVER['REMOTE_ADDR']
             ];
-            file_put_contents($users_file, json_encode($users, JSON_PRETTY_PRINT));
+            file_put_contents($users_file, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $redirect = $_SESSION['redirect_after_login'] ?? 'index.php';
             unset($_SESSION['redirect_after_login']);
