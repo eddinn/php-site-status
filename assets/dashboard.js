@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (showOnlyOffline && (!status || status.online)) return;
 
-                const name = status?.title || getFallbackName(url);
+                const name = status?.title?.trim() || getFallbackName(url);
                 const item = document.createElement("li");
                 item.className = `list-group-item d-flex justify-content-between align-items-center ${status ? (status.online ? "bg-success bg-opacity-10" : "bg-danger bg-opacity-10") : ""}`;
 
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 `;
 
                 const editBtn = isAdmin
-                    ? `<a href="edit_service.php?group=${encodeURIComponent(group)}&index=${index}" class="btn btn-sm btn-outline-secondary ms-3">Edit</a>`
+                    ? `<a href="edit_service.php?group=${encodeURIComponent(group)}&index=${index}" class="btn btn-sm btn-outline-secondary ms-3" title="Edit"><span style="font-size: 1rem;">✏️</span></a>`
                     : "";
 
                 item.innerHTML = `
@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             .then(res => res.ok ? res.text() : "")
             .then(html => {
                 const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-                return { online: true, title: titleMatch ? titleMatch[1] : null };
+                return { online: true, title: titleMatch ? titleMatch[1].trim() : null };
             })
             .catch(() => ({ online: false, title: null }));
     }
