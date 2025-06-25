@@ -1,9 +1,8 @@
 <?php
 require_once 'init.php';
 
-$users_file = 'users.json';
+$users_file = __DIR__ . '/../secure/users.json';
 
-// Ensure admin account exists
 if (!file_exists($users_file)) {
     file_put_contents($users_file, json_encode([
         'admin' => [

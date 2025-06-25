@@ -1,7 +1,7 @@
 <?php
 require_once 'init.php';
 
-$users_file = 'users.json';
+$users_file = __DIR__ . '/../secure/users.json';
 
 // Require login
 if (!isset($_SESSION['user']) || $_SESSION['user'] !== 'admin') {

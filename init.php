@@ -1,5 +1,7 @@
 <?php
-$secure = !empty($_SERVER['HTTPS']) || $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https';
+$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+       || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
+
 session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
@@ -10,7 +12,6 @@ session_set_cookie_params([
 ]);
 session_start();
 
-// Security headers (for HTTPS)
 if ($secure) {
     header("Content-Security-Policy: default-src 'self';");
     header("X-Content-Type-Options: nosniff");
