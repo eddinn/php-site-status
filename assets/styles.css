@@ -159,3 +159,29 @@ form .form-label {
         height: auto;
     }
 }
+
+/* Main layout fix for sidebar spacing */
+body > .d-flex {
+    margin-left: 220px; /* equal to sidebar width */
+}
+
+.sidebar {
+    width: 220px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+@media (max-width: 768px) {
+    body > .d-flex {
+        margin-left: 0;
+    }
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+}
