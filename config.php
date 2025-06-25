@@ -19,7 +19,7 @@ if (!is_dir(SECURE_DIR)) {
     mkdir(SECURE_DIR, 0700, true);
 }
 
-// Application version (dynamic from Git)
+// Application version (dynamic from Git if available)
 define('APP_VERSION', get_app_version());
 
 function get_app_version(): string {
@@ -27,10 +27,31 @@ function get_app_version(): string {
     $count = 0;
     $commit = 'unknown';
 
-    // Only attempt Git versioning if inside a Git repo
-    if (is_dir(dirname(ROOT_DIR) . '/.git')) {
-        $count = trim(@shell_exec('git rev-list --count HEAD')) ?: 0;
-        $commit = trim(@shell_exec('git rev-parse --short HEAD')) ?: 'unknown';
+    $gitDir = ROOT_DIR . '/.git';
+    $headFile = $gitDir . '/HEAD';
+
+    if (is_dir($gitDir) && file_exists($headFile)) {
+        $ref = trim(file_get_contents($headFile));
+        if (str_starts_with($ref, 'ref:')) {
+            $refPath = $gitDir . '/' . substr($ref, 5);
+            if (file_exists($refPath)) {
+                $commit = trim(file_get_contents($refPath));
+            }
+        } else {
+            $commit = $ref; // Detached HEAD
+        }
+
+        // Shorten commit hash if long
+        if (preg_match('/^[a-f0-9]{40}$/', $commit)) {
+            $commit = substr($commit, 0, 7);
+        }
+
+        // Count commits manually if log exists
+        $logPath = $gitDir . '/logs/HEAD';
+        if (file_exists($logPath)) {
+            $lines = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            $count = count($lines);
+        }
     }
 
     return "{$base}." . intval($count) . " ({$commit})";
