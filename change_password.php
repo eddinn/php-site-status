@@ -1,40 +1,32 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
-$users_file = __DIR__ . '/../secure/users.json';
+require_login();
 
-// Require login
-if (!isset($_SESSION['user']) || $_SESSION['user'] !== 'admin') {
-    header("Location: login.php");
-    exit;
-}
+$users = file_exists(USERS_FILE)
+    ? json_decode(file_get_contents(USERS_FILE), true)
+    : [];
 
-$users = json_decode(file_get_contents($users_file), true);
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!validate_csrf($_POST['csrf'] ?? '')) {
-        $error = "Invalid request token.";
+    verify_csrf_token();
+
+    $new_password = $_POST['new_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+
+    if (strlen($new_password) < 6) {
+        $error = "Password must be at least 6 characters.";
+    } elseif ($new_password !== $confirm_password) {
+        $error = "Passwords do not match.";
     } else {
-        $newpass = $_POST['newpass'] ?? '';
-        $confirm = $_POST['confirm'] ?? '';
+        $users[DEFAULT_USER]['password'] = password_hash($new_password, PASSWORD_DEFAULT);
+        $users[DEFAULT_USER]['force_password_change'] = false;
 
-        if (strlen($newpass) < 6) {
-            $error = "Password must be at least 6 characters.";
-        } elseif ($newpass !== $confirm) {
-            $error = "Passwords do not match.";
-        } else {
-            $users['admin']['password'] = password_hash($newpass, PASSWORD_DEFAULT);
-            $users['admin']['force_password_change'] = false;
-
-            if (file_put_contents($users_file, json_encode($users, JSON_PRETTY_PRINT)) === false) {
-                $error = "Failed to save new password.";
-            } else {
-                $success = "Password updated successfully. Redirecting...";
-                header("Refresh:2; URL=edit_services.php");
-            }
-        }
+        file_put_contents(USERS_FILE, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+        $success = "Password updated successfully.";
     }
 }
 ?>
@@ -46,26 +38,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Change Password – Homelab Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="d-flex justify-content-center align-items-center vh-100 bg-light">
-    <form method="post" class="p-4 bg-white shadow rounded" style="min-width: 300px;">
-        <h4 class="mb-3">Change Password</h4>
-        <?php if ($error): ?>
-            <div class="alert alert-danger"><?= h($error) ?></div>
-        <?php elseif ($success): ?>
-            <div class="alert alert-success"><?= h($success) ?></div>
-        <?php endif; ?>
+<body class="bg-light">
+<div class="container mt-5" style="max-width: 500px;">
+    <h3 class="mb-4">Change Admin Password</h3>
+
+    <?php if ($error): ?>
+        <div class="alert alert-danger"><?= h($error) ?></div>
+    <?php elseif ($success): ?>
+        <div class="alert alert-success"><?= h($success) ?></div>
+    <?php endif; ?>
+
+    <form method="post">
         <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
         <div class="mb-3">
-            <input type="password" name="newpass" placeholder="New Password" required class="form-control" autocomplete="new-password">
+            <input type="password" name="new_password" class="form-control" placeholder="New password" required>
         </div>
         <div class="mb-3">
-            <input type="password" name="confirm" placeholder="Confirm Password" required class="form-control" autocomplete="new-password">
+            <input type="password" name="confirm_password" class="form-control" placeholder="Confirm password" required>
         </div>
-        <button type="submit" class="btn btn-success w-100">Update Password</button>
-        <div class="mt-3 text-muted small">
-            <p>Locked out? You can manually reset the password by editing <code>users.json</code> on the server.</p>
-            <p>Use <code>php -r "echo password_hash('newpass', PASSWORD_DEFAULT);"</code> to generate a new hash.</p>
-        </div>
+        <button type="submit" class="btn btn-primary">Change Password</button>
+        <a href="index.php" class="btn btn-secondary ms-2">Cancel</a>
     </form>
+
+    <hr>
+    <p class="text-muted mt-4">
+        ⚠️ If you forget your password and can't log in:<br>
+        <strong>Manually reset it</strong> by editing the file:<br>
+        <code><?= h(USERS_FILE) ?></code><br>
+        Replace the hash with:<br>
+        <code><?= h(password_hash(DEFAULT_PASSWORD, PASSWORD_DEFAULT)) ?></code><br>
+        Then log in again using password "<strong><?= h(DEFAULT_PASSWORD) ?></strong>".
+    </p>
+</div>
 </body>
 </html>

@@ -1,23 +1,22 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
-$users_file = __DIR__ . '/../secure/users.json';
-
-if (!file_exists($users_file)) {
+if (!file_exists(USERS_FILE)) {
     file_put_contents(
-        $users_file,
+        USERS_FILE,
         json_encode([
-            'admin' => [
-                'password' => password_hash('changeme', PASSWORD_DEFAULT),
+            DEFAULT_USER => [
+                'password' => password_hash(DEFAULT_PASSWORD, PASSWORD_DEFAULT),
                 'force_password_change' => true,
-                'last_login'          => null,
-                'last_ip'             => null
+                'last_login' => null,
+                'last_ip' => null
             ]
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
 
-$users = json_decode(file_get_contents($users_file), true);
+$users = json_decode(file_get_contents(USERS_FILE), true);
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -25,21 +24,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Invalid request token.";
     } else {
         $password = $_POST['password'] ?? '';
-        $user     = 'admin';
+        $user     = DEFAULT_USER;
 
         if (!isset($users[$user]) || !password_verify($password, $users[$user]['password'])) {
             $error = "Invalid password.";
         } else {
-            /** ---- successful login ---- */
             session_regenerate_id(true);
             $_SESSION['user'] = $user;
 
-            /* store last-login time & IP  */
             $users[$user]['last_login'] = date('Y-m-d H:i:s');
-            $users[$user]['last_ip']    = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-            file_put_contents($users_file, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+            $users[$user]['last_ip'] = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            file_put_contents(USERS_FILE, json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-            /* redirect destination */
             $redirect = $_SESSION['redirect_to'] ?? 'index.php';
             unset($_SESSION['redirect_to']);
 
@@ -53,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>

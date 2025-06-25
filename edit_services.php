@@ -1,13 +1,15 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
-$services_file = 'services.json';
-$backup_file = 'services_backup_' . date('Ymd_His') . '.json';
-
-$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
+$is_logged_in = is_logged_in();
 $error = '';
 $success = '';
-$json_contents = file_exists($services_file) ? file_get_contents($services_file) : "{}";
+$backup_file = 'services_backup_' . date('Ymd_His') . '.json';
+
+$json_contents = file_exists(SERVICES_FILE)
+    ? file_get_contents(SERVICES_FILE)
+    : "{}";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in) {
     if (!validate_csrf($_POST['csrf'] ?? '')) {
@@ -19,13 +21,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in) {
         if ($decoded === null || !is_array($decoded)) {
             $error = "Invalid JSON format.";
         } else {
-            if (!copy($services_file, $backup_file)) {
+            if (!copy(SERVICES_FILE, $backup_file)) {
                 $error = "Failed to create backup.";
-            } elseif (file_put_contents($services_file, json_encode($decoded, JSON_PRETTY_PRINT)) === false) {
+            } elseif (file_put_contents(SERVICES_FILE, json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
                 $error = "Failed to write changes.";
             } else {
                 $success = "Service configuration updated.";
-                $json_contents = json_encode($decoded, JSON_PRETTY_PRINT);
+                $json_contents = json_encode($decoded, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             }
         }
     }
@@ -68,14 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in) {
         <?php endif; ?>
 
         <?php if ($is_logged_in): ?>
-        <form method="post">
-            <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
-            <div class="mb-3">
-                <textarea name="services_json" class="form-control"><?= h($json_contents) ?></textarea>
-            </div>
-            <button type="submit" class="btn btn-success">Save Changes</button>
-            <a href="index.php" class="btn btn-secondary ms-2">Back to Dashboard</a>
-        </form>
+            <form method="post">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>">
+                <div class="mb-3">
+                    <textarea name="services_json" class="form-control"><?= h($json_contents) ?></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Save Changes</button>
+                <a href="index.php" class="btn btn-secondary ms-2">Back to Dashboard</a>
+            </form>
         <?php else: ?>
             <div class="alert alert-warning">You are not logged in. This view is read-only.</div>
             <textarea class="form-control" readonly><?= h($json_contents) ?></textarea>

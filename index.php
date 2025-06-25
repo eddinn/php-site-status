@@ -1,19 +1,16 @@
 <?php
 require_once 'init.php';
+require_once 'config.php';
 
-$services_file = 'services.json';
-$services = file_exists($services_file) ? json_decode(file_get_contents($services_file), true) : [];
+$services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
 
-$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
+$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === DEFAULT_USER;
 
 $lastLogin = $lastIp = null;
-if ($is_logged_in) {
-    $users_file = __DIR__ . '/../secure/users.json';
-    if (file_exists($users_file)) {
-        $userData = json_decode(file_get_contents($users_file), true)['admin'] ?? [];
-        $lastLogin = $userData['last_login'] ?? null;
-        $lastIp = $userData['last_ip'] ?? null;
-    }
+if ($is_logged_in && file_exists(USERS_FILE)) {
+    $userData = json_decode(file_get_contents(USERS_FILE), true)[DEFAULT_USER] ?? [];
+    $lastLogin = $userData['last_login'] ?? null;
+    $lastIp = $userData['last_ip'] ?? null;
 }
 ?>
 
@@ -68,7 +65,7 @@ if ($is_logged_in) {
         <!-- Footer -->
         <footer class="bg-light text-center py-3 mt-5 border-top">
             <small>
-                Version 1.0 — <?= date("Y-m-d") ?>
+                Version <?= APP_VERSION ?> — <?= date("Y-m-d") ?>
                 <?php if ($is_logged_in && $lastLogin): ?>
                     — Last login: <?= h($lastLogin) ?> from <?= h($lastIp) ?>
                 <?php endif; ?>
