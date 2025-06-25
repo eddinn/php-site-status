@@ -19,7 +19,7 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="assets/dashboard.js" defer></script>
 </head>
-<body class="light-mode">
+<body class="light-mode" data-admin="<?= $is_logged_in ? '1' : '0' ?>">
 
 <!-- Sidebar -->
 <div class="d-flex">

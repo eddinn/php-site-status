@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const exportMd = document.getElementById("export-md");
     const exportJson = document.getElementById("export-json");
 
+    const isAdmin = document.body.dataset.admin === "1";
+
     let darkMode = false;
     let showOnlyOffline = false;
     let serviceData = {};
@@ -15,6 +17,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.body.classList.toggle("light-mode", !enabled);
         darkToggle.textContent = enabled ? "🌞 Light Mode" : "🌓 Dark Mode";
         darkMode = enabled;
+    }
+
+    function getFallbackName(url) {
+        try {
+            const u = new URL(url);
+            return u.hostname;
+        } catch {
+            return "Unnamed Service";
+        }
     }
 
     function render() {
@@ -32,15 +43,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
                 if (showOnlyOffline && (!status || status.online)) return;
 
+                const name = status?.title || getFallbackName(url);
                 const item = document.createElement("li");
                 item.className = `list-group-item d-flex justify-content-between align-items-center ${status ? (status.online ? "bg-success bg-opacity-10" : "bg-danger bg-opacity-10") : ""}`;
-                item.innerHTML = `
-                    <div>
-                        <span class="me-2 ${status ? (status.online ? "text-success" : "text-danger") : ""}">●</span>
-                        <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
-                    </div>
-                    ${status ? `<small>${status.title}</small>` : `<small class="text-muted">Checking...</small>`}
+
+                const linkHtml = `
+                    <span class="me-2 ${status ? (status.online ? "text-success" : "text-danger") : ""}">●</span>
+                    <strong class="me-3">${name}</strong>
+                    <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>
                 `;
+
+                const editBtn = isAdmin
+                    ? `<a href="edit_service.php?group=${encodeURIComponent(group)}&index=${index}" class="btn btn-sm btn-outline-secondary ms-3">Edit</a>`
+                    : "";
+
+                item.innerHTML = `
+                    <div class="d-flex align-items-center flex-grow-1">
+                        ${linkHtml}
+                    </div>
+                    <div>${editBtn}</div>
+                `;
+
+                item.setAttribute("data-url", url);
                 list.appendChild(item);
             });
 
@@ -54,9 +78,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             .then(res => res.ok ? res.text() : "")
             .then(html => {
                 const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-                return { online: true, title: titleMatch ? titleMatch[1] : "Online" };
+                return { online: true, title: titleMatch ? titleMatch[1] : null };
             })
-            .catch(() => ({ online: false, title: "Offline" }));
+            .catch(() => ({ online: false, title: null }));
     }
 
     function updateStatuses() {
@@ -111,7 +135,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         link.click();
     };
 
-    // Load service config and start
     try {
         const response = await fetch("services.json");
         serviceData = await response.json();
