@@ -1,9 +1,11 @@
 <?php
 require_once 'init.php';
 require_once 'config.php';
+
 require_login();
 
-$error = $success = '';
+$error = '';
+$success = '';
 $services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -12,56 +14,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'add_group':
-                $g = trim($_POST['new_group'] ?? '');
-                if ($g && !isset($services[$g])) {
-                    $services[$g] = [];
-                    $success = "Group '$g' added.";
+                $new_group = trim($_POST['new_group'] ?? '');
+                if ($new_group && !isset($services[$new_group])) {
+                    $services[$new_group] = [];
+                    $success = "Group '{$new_group}' added.";
                 } else {
                     $error = "Invalid or duplicate group name.";
                 }
                 break;
+
             case 'delete_group':
-                $g = $_POST['group'] ?? '';
-                if (isset($services[$g])) {
-                    unset($services[$g]);
-                    $success = "Group '$g' removed.";
+                $group = $_POST['group'] ?? '';
+                if (isset($services[$group])) {
+                    unset($services[$group]);
+                    $success = "Group '{$group}' deleted.";
                 } else {
                     $error = "Group not found.";
                 }
                 break;
+
             case 'add_service':
-                $g = $_POST['group'] ?? '';
-                $u = trim($_POST['url'] ?? '');
-                if (isset($services[$g]) && filter_var($u, FILTER_VALIDATE_URL)) {
-                    $services[$g][] = $u;
+                $group = $_POST['group'] ?? '';
+                $url = trim($_POST['url'] ?? '');
+                if (isset($services[$group]) && filter_var($url, FILTER_VALIDATE_URL)) {
+                    $services[$group][] = $url;
                     $success = "Service added.";
                 } else {
                     $error = "Invalid group or URL.";
                 }
                 break;
+
             case 'delete_service':
-                $g = $_POST['group'] ?? '';
-                $i = intval($_POST['index'] ?? -1);
-                if (isset($services[$g][$i])) {
-                    array_splice($services[$g], $i, 1);
+                $group = $_POST['group'] ?? '';
+                $index = intval($_POST['index'] ?? -1);
+                if (isset($services[$group][$index])) {
+                    array_splice($services[$group], $index, 1);
                     $success = "Service removed.";
                 } else {
                     $error = "Service not found.";
-                }
-                break;
-            case 'reorder':
-                $o = json_decode($_POST['order'] ?? '', true);
-                if (is_array($o)) {
-                    $new = [];
-                    foreach ($o as $grp => $urls) {
-                        if (isset($services[$grp]) && is_array($urls)) {
-                            $new[$grp] = array_values(array_filter($urls, fn($u) => filter_var($u, FILTER_VALIDATE_URL)));
-                        }
-                    }
-                    $services = $new;
-                    $success = "Reordered successfully.";
-                } else {
-                    $error = "Bad order data.";
                 }
                 break;
         }
@@ -75,140 +65,125 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Manage Services – Homelab Dashboard</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="csrf" content="<?=h(csrf_token())?>">
-  <link href="assets/styles.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="csrf" content="<?= h(csrf_token()) ?>" />
+  <link rel="stylesheet" href="assets/styles.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 </head>
 <body class="light-mode">
-<nav class="navbar navbar-dark bg-primary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="index.php">Dashboard</a>
-    <span class="navbar-text">Manage Services</span>
-  </div>
-</nav>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
+    <a class="navbar-brand" href="index.php">← Back to Dashboard</a>
+  </nav>
 
-<div class="container py-4">
-  <?php if ($error): ?>
-    <div class="alert alert-danger"><?=h($error)?></div>
-  <?php elseif ($success): ?>
-    <div class="alert alert-success"><?=h($success)?></div>
-  <?php endif; ?>
+  <div class="container py-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="index.php">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Manage Services</li>
+      </ol>
+    </nav>
 
-  <form method="post" class="mb-4 d-flex gap-2">
-    <input type="hidden" name="csrf" value="<?=h(csrf_token())?>">
-    <input type="hidden" name="action" value="add_group">
-    <input type="text" name="new_group" class="form-control" placeholder="New group name" required>
-    <button class="btn btn-primary">➕ Add Group</button>
-  </form>
+    <h2 class="mb-4">Manage Service Groups</h2>
 
-  <div id="group-list">
-    <?php foreach ($services as $grp => $urls): ?>
-      <div class="card mb-4 group-card" data-group="<?=h($grp)?>">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <strong class="drag-handle">≡ <?=h($grp)?></strong>
-          <div>
-            <a href="edit_service.php?group=<?=urlencode($grp)?>&index=0" class="btn btn-sm btn-outline-secondary me-2" title="Edit group">&#9998;</a>
-            <button class="btn btn-sm btn-danger delete-group-btn">🗑️</button>
-          </div>
-        </div>
-        <ul class="list-group list-group-flush service-list">
-          <?php foreach ($urls as $i => $u): ?>
-            <li class="list-group-item d-flex justify-content-between align-items-center" data-index="<?=$i?>">
-              <span><?=h($u)?></span>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-secondary edit-service-btn">✏️</button>
-                <button class="btn btn-sm btn-danger delete-service-btn">🗑️</button>
-              </div>
-            </li>
-          <?php endforeach;?>
-        </ul>
-        <form method="post" class="card-body d-flex gap-2">
-          <input type="hidden" name="csrf" value="<?=h(csrf_token())?>">
-          <input type="hidden" name="action" value="add_service">
-          <input type="hidden" name="group" value="<?=h($grp)?>">
-          <input type="url" name="url" class="form-control" placeholder="Add service URL" required>
-          <button class="btn btn-success">Add</button>
-        </form>
+    <?php if ($error): ?>
+      <div class="alert alert-danger"><?= h($error) ?></div>
+    <?php elseif ($success): ?>
+      <div class="alert alert-success"><?= h($success) ?></div>
+    <?php endif; ?>
+
+    <!-- Add Group Form -->
+    <form method="post" class="mb-4 row g-2 align-items-end">
+      <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>" />
+      <input type="hidden" name="action" value="add_group" />
+      <div class="col-sm-8">
+        <label for="new_group" class="form-label">New Group Name</label>
+        <input type="text" name="new_group" id="new_group" class="form-control" required placeholder="e.g. Media, Networking" />
       </div>
-    <?php endforeach;?>
+      <div class="col-sm-4 text-end">
+        <button class="btn btn-success w-100">Add Group</button>
+      </div>
+    </form>
+
+    <!-- Groups & Services -->
+    <div id="group-list">
+      <?php foreach ($services as $group => $urls): ?>
+        <div class="card mb-4 group-card" data-group="<?= h($group) ?>">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <span><strong><?= h($group) ?></strong></span>
+            <div class="btn-group">
+              <a href="add_service.php?group=<?= urlencode($group) ?>" class="btn btn-sm btn-outline-primary">✚ Add Service</a>
+              <a href="edit_group.php?group=<?= urlencode($group) ?>" class="btn btn-sm btn-outline-secondary">✎ Edit</a>
+              <form method="post" class="m-0 d-inline">
+                <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>" />
+                <input type="hidden" name="action" value="delete_group" />
+                <input type="hidden" name="group" value="<?= h($group) ?>" />
+                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete group <?= h($group) ?>?')">🗑️</button>
+              </form>
+            </div>
+          </div>
+
+          <ul class="list-group list-group-flush service-list">
+            <?php foreach ($urls as $index => $url): ?>
+              <li class="list-group-item d-flex justify-content-between align-items-center" data-index="<?= $index ?>">
+                <span><?= h($url) ?></span>
+                <div class="btn-group">
+                  <a href="edit_service.php?group=<?= urlencode($group) ?>&index=<?= $index ?>" class="btn btn-sm btn-outline-secondary">✎</a>
+                  <form method="post" class="m-0 d-inline">
+                    <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>" />
+                    <input type="hidden" name="action" value="delete_service" />
+                    <input type="hidden" name="group" value="<?= h($group) ?>" />
+                    <input type="hidden" name="index" value="<?= $index ?>" />
+                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remove this service?')">🗑️</button>
+                  </form>
+                </div>
+              </li>
+            <?php endforeach; ?>
+          </ul>
+        </div>
+      <?php endforeach; ?>
+    </div>
   </div>
 
-  <button id="save-order" class="btn btn-outline-primary mb-4">💾 Save Order</button>
-</div>
+  <footer class="text-center py-3 border-top bg-light">
+    <small>Version <?= h(APP_VERSION) ?> — <?= date("Y-m-d") ?></small>
+  </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const csrf = document.querySelector('meta[name=csrf]').content;
-  const groupList = document.getElementById('group-list');
-
-  // Draggable groups and services
-  Sortable.create(groupList, {
-    handle: '.drag-handle',
-    animation: 150,
-    onEnd: saveOrder
-  });
-  document.querySelectorAll('.service-list').forEach(el=>{
-    Sortable.create(el, {
+  <script>
+    // Drag & drop groups
+    Sortable.create(document.getElementById('group-list'), {
+      handle: '.card-header',
       animation: 150,
-      onEnd: saveOrder
+      onEnd: () => {
+        const order = Array.from(document.querySelectorAll('.group-card'))
+          .map(c => c.getAttribute('data-group'));
+        fetch('save_group_order.php', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ csrf: '<?= h(csrf_token()) ?>', order })
+        });
+      }
     });
-  });
 
-  // Event delegation for edit/delete
-  groupList.addEventListener('click', e => {
-    const li = e.target.closest('li');
-    const card = e.target.closest('.group-card');
-    const group = card.dataset.group;
-
-    if (e.target.matches('.delete-service-btn')) {
-      if (!confirm('Delete this service?')) return;
-      const idx = li.dataset.index;
-      postAction({action:'delete_service', group, index: idx});
-    }
-    if (e.target.matches('.edit-service-btn')) {
-      const idx = li.dataset.index;
-      window.location = `edit_service.php?group=${encodeURIComponent(group)}&index=${idx}`;
-    }
-    if (e.target.matches('.delete-group-btn')) {
-      if (!confirm('Delete entire group?')) return;
-      postAction({action:'delete_group', group});
-    }
-  });
-
-  document.getElementById('save-order').addEventListener('click', saveOrder);
-
-  function saveOrder() {
-    const data = {};
-    groupList.querySelectorAll('.group-card').forEach(card => {
-      const g = card.dataset.group;
-      const urls = [...card.querySelectorAll('.service-list li')].map(li=>li.querySelector('span').textContent);
-      data[g] = urls;
+    // Drag & drop within each group
+    document.querySelectorAll('.service-list').forEach(ul => {
+      Sortable.create(ul, {
+        handle: 'li',
+        animation: 150,
+        onEnd: (evt) => {
+          const group = evt.to.closest('.group-card').getAttribute('data-group');
+          const order = Array.from(evt.to.querySelectorAll('li'))
+            .map(li => li.querySelector('span').textContent.trim());
+          fetch('save_sort_order.php', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ csrf: '<?= h(csrf_token()) ?>', group, order })
+          });
+        }
+      });
     });
-    fetch('manage_services.php', {
-      method: 'POST',
-      headers: {'Content-Type':'application/x-www-form-urlencoded'},
-      body: `csrf=${encodeURIComponent(csrf)}&action=reorder&order=${encodeURIComponent(JSON.stringify(data))}`
-    }).then(res => location.reload());
-  }
-
-  function postAction(obj) {
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.innerHTML = `
-      <input type="hidden" name="csrf" value="${csrf}">
-      <input type="hidden" name="action" value="${obj.action}">
-      <input type="hidden" name="group" value="${obj.group}">
-      ${obj.index ? `<input type="hidden" name="index" value="${obj.index}">` : ''}
-    `;
-    document.body.appendChild(form);
-    form.submit();
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
