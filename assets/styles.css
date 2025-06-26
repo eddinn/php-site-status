@@ -147,11 +147,7 @@ footer {
 }
 
 /* Dashboard Layout */
-#service-dashboard {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-}
+
 
 /* Group Card Width */
 .group-card {
@@ -176,4 +172,16 @@ form .form-label {
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-size: 90%;
+}
+
+
+/* Ensure consistent theming across all .btn and nav */
+.dark-mode .btn, .dark-mode .navbar, .dark-mode .card {
+    background-color: #282c34 !important;
+    color: #e6e6e6 !important;
+}
+
+.light-mode .btn, .light-mode .navbar, .light-mode .card {
+    background-color: #ffffff !important;
+    color: #212529 !important;
 }

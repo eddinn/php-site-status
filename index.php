@@ -8,6 +8,11 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf" content="<?= h(csrf_token()) ?>">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/dashboard.js" defer></script>
     <meta charset="UTF-8">
     <title>Service Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">

@@ -36,13 +36,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf" content="<?= h(csrf_token()) ?>">
+    <link rel="stylesheet" href="assets/styles.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="assets/dashboard.js" defer></script>
     <meta charset="UTF-8">
     <title>Edit Services (Raw JSON)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="assets/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="light-mode">
+<body class="<?= isset($_COOKIE['darkMode']) && $_COOKIE['darkMode'] === 'true' ? 'dark-mode' : 'light-mode' ?>">
 
 <!-- Top Bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
