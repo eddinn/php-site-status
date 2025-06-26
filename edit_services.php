@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $is_logged_in) {
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
     <span class="navbar-brand">Edit Service JSON</span>
     <div class="ms-auto">
-        <a href="index.php" class="btn btn-sm btn-outline-light">← Back to Dashboard</a>
+        <a href="index.php" class="navbar-brand text-black btn btn-sm btn-outline-dark">← Back to Dashboard</a>
     </div>
 </nav>
 
