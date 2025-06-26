@@ -185,3 +185,31 @@ form .form-label {
     background-color: #ffffff !important;
     color: #212529 !important;
 }
+
+/* Extended Theme Styling for Consistency */
+
+.light-mode .breadcrumb,
+.light-mode .btn,
+.light-mode footer,
+.light-mode .form-label {
+    color: #212529;
+    background-color: #ffffff;
+}
+
+.dark-mode .breadcrumb,
+.dark-mode .btn,
+.dark-mode footer,
+.dark-mode .form-label {
+    color: #e6e6e6;
+    background-color: #282c34;
+}
+
+.dark-mode .btn-secondary {
+    background-color: #3a3f4b;
+    border-color: #6c757d;
+    color: #ffffff;
+}
+
+.dark-mode .btn-secondary:hover {
+    background-color: #4b505c;
+}

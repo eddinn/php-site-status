@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         Object.entries(serviceData).forEach(([group, urls], groupIndex) => {
             const groupCol = document.createElement("div");
-            groupCol.className = "group-card";
+            groupCol.className = "col-md-6 group-card";
             groupCol.dataset.group = group;
 
             const groupCard = document.createElement("div");
