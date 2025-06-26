@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <div class="card-header d-flex justify-content-between align-items-center">
             <span><strong><?= h($group) ?></strong></span>
             <div class="btn-group">
-              <a href="add_service.php?group=<?= urlencode($group) ?>" class="btn btn-sm btn-outline-primary">✚ Add Service</a>
+              <a href="add_service.php?group=<?= urlencode($group) ?>" class="btn btn-sm btn-outline-primary">✚ Add</a>
               <a href="edit_group.php?group=<?= urlencode($group) ?>" class="btn btn-sm btn-outline-secondary">✎ Edit</a>
               <form method="post" class="m-0 d-inline">
                 <input type="hidden" name="csrf" value="<?= h(csrf_token()) ?>" />

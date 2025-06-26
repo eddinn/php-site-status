@@ -3,10 +3,8 @@ require_once 'init.php';
 require_once 'config.php';
 
 $services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
-
 $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +52,7 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
         <!-- Dashboard -->
         <div class="container-fluid p-4">
             <h2 class="mb-4">Service Status</h2>
-            <div id="service-dashboard" class="row gy-4 sortable-groups">
+            <div id="service-dashboard" class="row row-cols-1 row-cols-md-2 g-4 sortable-groups">
                 <!-- Group cards injected here -->
             </div>
         </div>
