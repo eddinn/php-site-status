@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="light-mode">
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
-    <a class="navbar-brand" href="index.php">← Back to Dashboard</a>
+    <a class="navbar-brand text-white" href="index.php">← Back to Dashboard</a>
 </nav>
 
 <div class="container py-4">

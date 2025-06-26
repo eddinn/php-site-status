@@ -50,8 +50,8 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 
         <div class="container-fluid p-4">
             <h2 class="mb-4">Service Status</h2>
-            <div id="service-dashboard" class="sortable-groups">
-                <!-- Group cards injected by JS -->
+            <div id="service-dashboard" class="d-flex flex-wrap gap-4">
+                <!-- Cards injected here -->
             </div>
         </div>
 
