@@ -95,11 +95,17 @@ body {
 
 /* Sidebar */
 .sidebar {
-    min-width: 220px;
+    width: 200px;
+    min-width: 200px;
     background-color: #343a40;
     color: white;
     height: 100vh;
     position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1000;
 }
 
 .sidebar a.nav-link {
@@ -109,6 +115,23 @@ body {
 .sidebar a.nav-link:hover {
     background-color: #495057;
     border-radius: 5px;
+}
+
+/* Main layout fix for sidebar spacing */
+body > .d-flex {
+    margin-left: 200px; /* match sidebar width */
+}
+
+@media (max-width: 768px) {
+    body > .d-flex {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
 }
 
 /* Footer */
@@ -123,17 +146,23 @@ footer {
     user-select: none;
 }
 
-/* Group grid layout */
+/* Group grid layout for index.php */
 #service-dashboard {
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
 }
 
-/* Group column card wrapper (half-width) */
 .group-card {
     flex: 1 1 48%;
     min-width: 300px;
+}
+
+/* Adjust layout on smaller screens */
+@media (max-width: 1200px) {
+    .group-card {
+        flex: 1 1 100%;
+    }
 }
 
 /* Login + Form alignment */
@@ -146,42 +175,4 @@ form .form-label {
     padding: 0.2rem 0.4rem;
     border-radius: 4px;
     font-size: 90%;
-}
-
-/* Optional polish */
-@media (max-width: 768px) {
-    .group-card {
-        flex: 1 1 100%;
-    }
-
-    .sidebar {
-        position: relative;
-        height: auto;
-    }
-}
-
-/* Main layout fix for sidebar spacing */
-body > .d-flex {
-    margin-left: 220px; /* equal to sidebar width */
-}
-
-.sidebar {
-    width: 220px;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    overflow-y: auto;
-    z-index: 1000;
-}
-
-@media (max-width: 768px) {
-    body > .d-flex {
-        margin-left: 0;
-    }
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-    }
 }

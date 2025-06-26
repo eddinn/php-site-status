@@ -37,7 +37,6 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
 
     <!-- Main Content -->
     <div class="flex-fill">
-        <!-- Topbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
             <span class="navbar-brand">Homelab Services</span>
             <div class="ms-auto d-flex gap-2">
@@ -49,15 +48,13 @@ $is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
             </div>
         </nav>
 
-        <!-- Dashboard -->
         <div class="container-fluid p-4">
             <h2 class="mb-4">Service Status</h2>
-            <div id="service-dashboard" class="row row-cols-1 row-cols-md-2 g-4 sortable-groups">
-                <!-- Group cards injected here -->
+            <div id="service-dashboard" class="sortable-groups">
+                <!-- Group cards injected by JS -->
             </div>
         </div>
 
-        <!-- Footer -->
         <footer class="bg-light text-center py-3 mt-5 border-top">
             <small>Version <?= h(APP_VERSION) ?> — <?= date("Y-m-d") ?></small>
         </footer>
