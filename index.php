@@ -23,24 +23,24 @@ require_once 'includes/header.php';
                     <?php foreach ($group['services'] as $index => $service): 
                         [$online, $title] = check_url($service['url']);
                     ?>
-                        <li class="list-group-item d-flex justify-content-between align-items-start draggable-item" 
-                            draggable="true"
-                            data-url="<?= e($service['url']) ?>">
-                            <div class="me-auto">
-                                <span class="drag-handle me-2">&#9776;</span>
-                                <strong><?= e($title) ?></strong><br>
-                                <a href="<?= e($service['url']) ?>" target="_blank"><?= e($service['url']) ?></a>
-                            </div>
-                            <div class="text-end ms-3">
+                        <li class="list-group-item draggable-item" draggable="true" data-url="<?= e($service['url']) ?>">
+                            <div class="service-title-row">
+                                <div class="d-flex align-items-center">
+                                    <span class="drag-handle">&#9776;</span>
+                                    <strong><?= e($title) ?></strong>
+                                </div>
                                 <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
                                     <?= $online ? 'Online' : 'Offline' ?>
                                 </span>
-                                <div class="btn-group mt-2">
-                                    <a href="edit_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                    <a href="delete_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>&csrf=<?= $csrf ?>"
-                                       class="btn btn-sm btn-outline-danger"
-                                       onclick="return confirm('Delete this service?')">Delete</a>
-                                </div>
+                            </div>
+                            <div class="mt-1">
+                                <a href="<?= e($service['url']) ?>" target="_blank"><?= e($service['url']) ?></a>
+                            </div>
+                            <div class="service-controls btn-group mt-2">
+                                <a href="edit_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>" class="btn btn-outline-secondary">Edit</a>
+                                <a href="delete_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>&csrf=<?= $csrf ?>"
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('Delete this service?')">Delete</a>
                             </div>
                         </li>
                     <?php endforeach; ?>

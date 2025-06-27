@@ -42,7 +42,7 @@ body.dark-mode {
 
 .dark-mode footer {
     background-color: #2e3436;
-    color: #ccc;
+    color: #e0e0e0;
 }
 
 footer small {
@@ -61,6 +61,23 @@ footer small {
 .drag-handle {
     cursor: move;
     font-size: 1.2rem;
+    line-height: 1.5;
+    margin-right: 0.5rem;
+}
+
+.service-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.service-controls {
+    margin-top: 0.75rem;
+}
+
+.service-controls .btn {
+    padding: 0.15rem 0.4rem;
+    font-size: 0.75rem;
 }
 
 @media (max-width: 768px) {
