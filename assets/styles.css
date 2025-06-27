@@ -1,176 +1,57 @@
-/* Base */
+/* Light mode defaults */
 body {
     font-family: system-ui, sans-serif;
-    transition: background-color 0.3s, color 0.3s;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar,
-footer,
-.card,
-.card-header,
-.form-control,
-.list-group-item {
-    transition: background-color 0.3s, color 0.3s;
-}
-
-/* Light Theme */
-body.light-mode {
-    background-color: #f5f5f5;
+    background-color: #f8f9fa;
     color: #212529;
 }
 
-body.light-mode .navbar,
-body.light-mode .card-header,
-body.light-mode .card,
-body.light-mode .form-control,
-body.light-mode .list-group-item,
-body.light-mode footer {
-    background-color: #ffffff !important;
-    color: #212529 !important;
+.card {
+    border-radius: 0.5rem;
 }
 
-body.light-mode .btn-outline-light {
-    border-color: #ccc;
-    color: #212529;
-}
-
-body.light-mode .btn-outline-light:hover {
-    background-color: #ddd;
-}
-
-/* Dark Theme (Tango-style) */
-body.dark-mode {
-    background-color: #1c1f26;
-    color: #e6e6e6;
-}
-
-body.dark-mode .navbar,
-body.dark-mode .card-header,
-body.dark-mode .card,
-body.dark-mode .form-control,
-body.dark-mode .list-group-item,
-body.dark-mode footer {
-    background-color: #2c2f36 !important;
-    color: #e6e6e6 !important;
-}
-
-body.dark-mode .btn-outline-light {
-    border-color: #6c757d;
-    color: #d4d4d4;
-}
-
-body.dark-mode .btn-outline-light:hover {
-    background-color: #444b55;
-}
-
-body.dark-mode .breadcrumb-item a {
-    color: #9ecbff;
-}
-
-body.dark-mode a {
-    color: #9ecbff;
-}
-
-/* Sidebar */
-.sidebar {
-    width: 200px;
-    min-height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: #343a40;
-    padding: 1rem;
-    z-index: 1000;
-}
-
-.sidebar .nav-link {
-    color: #ddd;
-}
-
-.sidebar .nav-link:hover {
-    background-color: #495057;
-    border-radius: 4px;
-}
-
-/* Main content spacing (compensate for sidebar) */
-body > .d-flex > .flex-fill.ms-sidebar {
-    margin-left: 200px;
-}
-
-@media (max-width: 768px) {
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-    }
-
-    body > .d-flex > .flex-fill.ms-sidebar {
-        margin-left: 0;
-    }
-}
-
-/* Cards & Responsive Layout */
-#service-dashboard .group-card {
-    padding: 0;
-}
-
-#service-dashboard .card {
-    height: 100%;
-}
-
-#service-dashboard .card-header {
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-#service-dashboard .list-group-item {
+/* Spacing */
+.card-header, .card-footer {
     padding: 0.75rem 1rem;
 }
 
-.sortable-groups > .group-card {
-    width: 100%;
-}
-
-@media (min-width: 768px) {
-    .sortable-groups > .group-card {
-        width: calc(50% - 0.75rem);
-    }
-}
-
-@media (min-width: 1200px) {
-    .sortable-groups > .group-card {
-        width: calc(33.333% - 1rem);
-    }
-}
-
-/* Tint backgrounds for status */
-.bg-success.bg-opacity-10 {
-    background-color: rgba(40, 167, 69, 0.12) !important;
-}
-
-.bg-danger.bg-opacity-10 {
-    background-color: rgba(220, 53, 69, 0.12) !important;
-}
-
-/* Buttons */
-.btn-sm {
+.badge {
     font-size: 0.85rem;
+    padding: 0.4em 0.6em;
 }
 
-button,
-.btn,
-a.btn {
-    transition: background-color 0.2s ease, color 0.2s ease;
+/* Dark mode — Tango-inspired */
+body.dark-mode {
+    background-color: #2e3436;
+    color: #eeeeec;
 }
 
-footer small {
-    font-size: 0.875rem;
-    color: inherit;
+body.dark-mode .navbar,
+body.dark-mode .breadcrumb,
+body.dark-mode .card,
+body.dark-mode .list-group-item {
+    background-color: #2e3436 !important;
+    color: #eeeeec;
+    border-color: #555753;
 }
 
-.drag-handle {
-    cursor: grab;
-    user-select: none;
+body.dark-mode .btn-outline-secondary,
+body.dark-mode .btn-outline-danger,
+body.dark-mode .btn-primary,
+body.dark-mode .btn-success {
+    color: #eeeeec;
+    border-color: #888a85;
+}
+
+body.dark-mode .btn-outline-secondary:hover,
+body.dark-mode .btn-outline-danger:hover,
+body.dark-mode .btn-primary:hover,
+body.dark-mode .btn-success:hover {
+    background-color: #555753;
+    color: #ffffff;
+}
+
+body.dark-mode .breadcrumb-item a,
+body.dark-mode .navbar-brand,
+body.dark-mode .breadcrumb-item.active {
+    color: #eeeeec;
 }

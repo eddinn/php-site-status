@@ -1,0 +1,18 @@
+[
+    {
+        "id": "group1",
+        "name": "Media Services",
+        "services": [
+            { "url": "http://docker1.tailf31da.ts.net:7878" },
+            { "url": "http://docker1.tailf31da.ts.net:8989" }
+        ]
+    },
+    {
+        "id": "group2",
+        "name": "Utility Tools",
+        "services": [
+            { "url": "http://docker1.tailf31da.ts.net:8080" },
+            { "url": "http://docker1.tailf31da.ts.net:9117/UI/Login?cookiesChecked=1" }
+        ]
+    }
+]

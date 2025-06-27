@@ -1,65 +1,84 @@
 <?php
-require_once 'init.php';
-require_once 'config.php';
+require_once 'includes/functions.php';
 
-$services = file_exists(SERVICES_FILE) ? json_decode(file_get_contents(SERVICES_FILE), true) : [];
-$is_logged_in = isset($_SESSION['user']) && $_SESSION['user'] === 'admin';
+$groups = load_data();
+$csrf = generate_csrf_token();
+$dark_class = (isset($_COOKIE['theme']) && $_COOKIE['theme'] === 'dark') ? 'dark-mode' : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Service Dashboard</title>
+    <title>Dashboard - Service Status</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf" content="<?= h(csrf_token()) ?>">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
     <link rel="stylesheet" href="assets/styles.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="assets/dashboard.js" defer></script>
 </head>
-<body class="light-mode" data-admin="<?= $is_logged_in ? '1' : '0' ?>">
+<body class="<?= $dark_class ?>">
+<nav class="navbar navbar-dark bg-dark px-3">
+    <a class="navbar-brand text-light" href="index.php">Dashboard</a>
+    <div class="d-flex align-items-center ms-auto">
+        <div class="form-check form-switch text-light me-3">
+            <input class="form-check-input" type="checkbox" id="darkModeToggle">
+            <label class="form-check-label" for="darkModeToggle">Dark Mode</label>
+        </div>
+    </div>
+</nav>
 
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="bg-dark text-white p-3 sidebar">
-        <h4 class="mb-4">Menu</h4>
-        <ul class="nav flex-column gap-2">
-            <li class="nav-item"><a class="nav-link text-white" href="index.php">Dashboard</a></li>
-            <?php if ($is_logged_in): ?>
-                <li class="nav-item"><a class="nav-link text-white" href="manage_services.php">Manage Services</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="edit_services.php">Edit JSON</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="logout.php">Logout</a></li>
-            <?php else: ?>
-                <li class="nav-item"><a class="nav-link text-white" href="login.php">Login</a></li>
-            <?php endif; ?>
-        </ul>
+<div class="container mt-4">
+    <?= show_flash() ?>
+    <div class="row">
+        <?php foreach ($groups as $group): ?>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <strong><?= e($group['name']) ?></strong>
+                        <div class="btn-group">
+                            <a href="edit_group.php?id=<?= urlencode($group['id']) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a href="delete_group.php?id=<?= urlencode($group['id']) ?>&csrf=<?= $csrf ?>" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Delete this group and all its services?')">Delete</a>
+                        </div>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <?php foreach ($group['services'] as $index => $service): 
+                            [$online, $title] = check_url($service['url']);
+                        ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="me-auto">
+                                    <strong><?= e($title) ?></strong><br>
+                                    <a href="<?= e($service['url']) ?>" target="_blank"><?= e($service['url']) ?></a>
+                                </div>
+                                <div class="text-end ms-3">
+                                    <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
+                                        <?= $online ? 'Online' : 'Offline' ?>
+                                    </span>
+                                    <div class="btn-group mt-2">
+                                        <a href="edit_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <a href="delete_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>&csrf=<?= $csrf ?>"
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Delete this service?')">Delete</a>
+                                    </div>
+                                </div>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <div class="card-footer text-end">
+                        <a href="add_service.php?group_id=<?= urlencode($group['id']) ?>" class="btn btn-sm btn-primary">+ Add Service</a>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-fill ms-sidebar">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary px-4">
-            <span class="navbar-brand">Homelab Services</span>
-            <div class="ms-auto d-flex gap-2">
-                <button id="toggle-dark" class="btn btn-sm btn-outline-light">🌓 Dark Mode</button>
-                <button id="toggle-offline" class="btn btn-sm btn-outline-light">🔴 Show Offline</button>
-                <button id="export-md" class="btn btn-sm btn-outline-light">📄 Export MD</button>
-                <button id="export-json" class="btn btn-sm btn-outline-light">🔧 Export JSON</button>
-                <button onclick="location.reload()" class="btn btn-sm btn-outline-light">🔄 Refresh</button>
-            </div>
-        </nav>
-
-        <div class="container-fluid p-4">
-            <h2 class="mb-4">Service Status</h2>
-            <div id="service-dashboard" class="row gy-4 sortable-groups">
-                <!-- Group cards will be injected here -->
-            </div>
-        </div>
-
-        <footer class="bg-light text-center py-3 mt-5 border-top theme-footer">
-            <small class="text-muted">Version <?= h(APP_VERSION) ?> — <?= date("Y-m-d") ?></small>
-        </footer>
+    <div class="text-center mt-4">
+        <a href="add_group.php" class="btn btn-success">+ Add New Group</a>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="assets/script.js" defer></script>
 </body>
 </html>
