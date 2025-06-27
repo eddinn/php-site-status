@@ -40,6 +40,15 @@ body.dark-mode {
     color: #88c0d0;
 }
 
+.dark-mode footer {
+    background-color: #2e3436;
+    color: #ccc;
+}
+
+footer small {
+    color: inherit;
+}
+
 .alert-container {
     margin-top: 1rem;
 }

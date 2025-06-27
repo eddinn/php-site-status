@@ -20,17 +20,21 @@ require_once 'includes/header.php';
                     </div>
                 </div>
                 <ul class="list-group list-group-flush sortable-group" data-group-id="<?= e($group['id']) ?>">
-                    <?php foreach ($group['services'] as $index => $service): ?>
+                    <?php foreach ($group['services'] as $index => $service): 
+                        [$online, $title] = check_url($service['url']);
+                    ?>
                         <li class="list-group-item d-flex justify-content-between align-items-start draggable-item" 
                             draggable="true"
                             data-url="<?= e($service['url']) ?>">
                             <div class="me-auto">
                                 <span class="drag-handle me-2">&#9776;</span>
-                                <strong><?= e(parse_url($service['url'], PHP_URL_HOST) ?? 'Unknown') ?></strong><br>
+                                <strong><?= e($title) ?></strong><br>
                                 <a href="<?= e($service['url']) ?>" target="_blank"><?= e($service['url']) ?></a>
                             </div>
                             <div class="text-end ms-3">
-                                <span class="badge bg-secondary">?</span>
+                                <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
+                                    <?= $online ? 'Online' : 'Offline' ?>
+                                </span>
                                 <div class="btn-group mt-2">
                                     <a href="edit_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
                                     <a href="delete_service.php?group_id=<?= urlencode($group['id']) ?>&service_index=<?= $index ?>&csrf=<?= $csrf ?>"
