@@ -40,13 +40,17 @@ body.dark-mode {
     color: #88c0d0;
 }
 
-.dark-mode footer {
-    background-color: #2e3436;
-    color: #e0e0e0;
+.dark-mode .list-group-item a {
+    color: #a0c5e8;
 }
 
-footer small {
-    color: inherit;
+.dark-mode footer,
+.dark-mode footer small {
+    color: #e0e0e0 !important;
+}
+
+footer {
+    background-color: transparent;
 }
 
 .alert-container {
@@ -69,6 +73,10 @@ footer small {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.dark-mode .service-title-row strong {
+    color: #f0f0f0;
 }
 
 .service-controls {
