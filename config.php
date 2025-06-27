@@ -4,8 +4,8 @@ define('SITE_NAME', 'Homelab Dashboard');
 define('DEFAULT_TITLE', 'Dashboard');
 
 // File paths
-define('DATA_FILE', __DIR__ . '/../data.json');
-define('VERSION_FILE', __DIR__ . '/../version.txt');
+define('DATA_FILE', __DIR__ . '/data.json');
+define('VERSION_FILE', __DIR__ . '/version.txt');
 
 // Feature toggles
 define('ENABLE_DARK_MODE', true);
