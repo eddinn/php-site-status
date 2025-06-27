@@ -1,17 +1,18 @@
 <?php
 session_start();
+require_once __DIR__ . '/config.php';
 
 /**
- * Load JSON data from file
+ * Load JSON data from configured file
  */
-function load_data($path = 'data.json') {
+function load_data($path = DATA_FILE) {
     return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
 }
 
 /**
- * Save JSON data to file
+ * Save JSON data to configured file
  */
-function save_data($data, $path = 'data.json') {
+function save_data($data, $path = DATA_FILE) {
     file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }
 
@@ -40,7 +41,7 @@ function e($string) {
 }
 
 /**
- * Validate a service URL (must be http/https)
+ * Validate a service URL
  */
 function is_valid_url($url) {
     return filter_var($url, FILTER_VALIDATE_URL) &&
@@ -93,4 +94,14 @@ function show_flash() {
              . "</div>";
     }
     return '';
+}
+
+/**
+ * Return version info: version string, short Git hash, and today's date
+ */
+function get_version_info() {
+    $version = file_exists(VERSION_FILE) ? trim(file_get_contents(VERSION_FILE)) : '0.0.1';
+    $git_hash = trim(shell_exec('git rev-parse --short HEAD') ?? 'unknown');
+    $date_str = date('d/m/Y');
+    return "Version: " . e($version) . " " . e($git_hash) . " — " . e($date_str);
 }

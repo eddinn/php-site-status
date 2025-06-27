@@ -5,29 +5,38 @@ $groups = load_data();
 $group_id = $_GET['id'] ?? '';
 $csrf_token = $_GET['csrf'] ?? '';
 
+$page_title = "Delete Group";
+
 if (!verify_csrf_token($csrf_token)) {
     set_flash("Invalid CSRF token.", 'danger');
-    header('Location: index.php');
-    exit;
-}
-
-$updated_groups = [];
-$found = false;
-
-foreach ($groups as $group) {
-    if ($group['id'] === $group_id) {
-        $found = true;
-        continue; // Skip this group (delete)
-    }
-    $updated_groups[] = $group;
-}
-
-if ($found) {
-    save_data($updated_groups);
-    set_flash("Group deleted successfully.");
 } else {
-    set_flash("Group not found.", 'warning');
+    $updated_groups = [];
+    $found = false;
+
+    foreach ($groups as $group) {
+        if ($group['id'] === $group_id) {
+            $found = true;
+            continue;
+        }
+        $updated_groups[] = $group;
+    }
+
+    if ($found) {
+        save_data($updated_groups);
+        set_flash("Group deleted successfully.");
+    } else {
+        set_flash("Group not found.", 'warning');
+    }
 }
 
-header('Location: index.php');
-exit;
+require_once 'includes/header.php';
+?>
+
+<div class="alert-container">
+    <?= show_flash() ?>
+    <p class="text-center">Redirecting to dashboard...</p>
+</div>
+
+<meta http-equiv="refresh" content="2;url=index.php">
+
+<?php require_once 'includes/footer.php'; ?>
