@@ -1,57 +1,61 @@
-/* Light mode defaults */
-body {
-    font-family: system-ui, sans-serif;
-    background-color: #f8f9fa;
-    color: #212529;
-}
-
-.card {
-    border-radius: 0.5rem;
-}
-
-/* Spacing */
-.card-header, .card-footer {
-    padding: 0.75rem 1rem;
-}
-
-.badge {
-    font-size: 0.85rem;
-    padding: 0.4em 0.6em;
-}
-
-/* Dark mode — Tango-inspired */
 body.dark-mode {
     background-color: #2e3436;
-    color: #eeeeec;
+    color: #eee;
 }
 
-body.dark-mode .navbar,
-body.dark-mode .breadcrumb,
-body.dark-mode .card,
-body.dark-mode .list-group-item {
-    background-color: #2e3436 !important;
-    color: #eeeeec;
-    border-color: #555753;
+.dark-mode .navbar,
+.dark-mode .card {
+    background-color: #3b4042;
+    color: #eee;
 }
 
-body.dark-mode .btn-outline-secondary,
-body.dark-mode .btn-outline-danger,
-body.dark-mode .btn-primary,
-body.dark-mode .btn-success {
-    color: #eeeeec;
-    border-color: #888a85;
+.dark-mode .card-header,
+.dark-mode .card-footer {
+    background-color: #2d2d2d;
+    border-color: #555;
 }
 
-body.dark-mode .btn-outline-secondary:hover,
-body.dark-mode .btn-outline-danger:hover,
-body.dark-mode .btn-primary:hover,
-body.dark-mode .btn-success:hover {
-    background-color: #555753;
-    color: #ffffff;
+.dark-mode .list-group-item {
+    background-color: #444;
+    border-color: #666;
 }
 
-body.dark-mode .breadcrumb-item a,
-body.dark-mode .navbar-brand,
-body.dark-mode .breadcrumb-item.active {
-    color: #eeeeec;
+.dark-mode .btn {
+    color: #eee;
+    background-color: #555;
+    border-color: #666;
+}
+
+.dark-mode .btn-outline-secondary {
+    color: #ccc;
+    border-color: #888;
+}
+
+.dark-mode .btn-outline-secondary:hover {
+    background-color: #666;
+    color: #fff;
+}
+
+.dark-mode a {
+    color: #88c0d0;
+}
+
+.alert-container {
+    margin-top: 1rem;
+}
+
+.dragging {
+    opacity: 0.5;
+    background-color: #ccc;
+}
+
+.drag-handle {
+    cursor: move;
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
 }

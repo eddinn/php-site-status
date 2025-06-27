@@ -1,58 +1,56 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const draggables = document.querySelectorAll('.draggable-item');
+document.addEventListener('DOMContentLoaded', () => {
     const groups = document.querySelectorAll('.sortable-group');
 
-    let dragSrcEl = null;
-
-    draggables.forEach(item => {
-        item.addEventListener('dragstart', function (e) {
-            dragSrcEl = this;
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', this.dataset.url);
-            this.classList.add('dragging');
-        });
-
-        item.addEventListener('dragend', function () {
-            this.classList.remove('dragging');
-        });
-    });
-
     groups.forEach(group => {
-        group.addEventListener('dragover', function (e) {
+        const items = group.querySelectorAll('.draggable-item');
+        let dragging = null;
+
+        items.forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                dragging = item;
+                item.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', item.dataset.url);
+            });
+
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+            });
+        });
+
+        group.addEventListener('dragover', (e) => {
             e.preventDefault();
-            const dragging = document.querySelector('.dragging');
-            const afterElement = getDragAfterElement(this, e.clientY);
+            const draggingItem = group.querySelector('.dragging');
+            const afterElement = getDragAfterElement(group, e.clientY);
             if (afterElement == null) {
-                this.appendChild(dragging);
+                group.appendChild(draggingItem);
             } else {
-                this.insertBefore(dragging, afterElement);
+                group.insertBefore(draggingItem, afterElement);
             }
         });
 
-        group.addEventListener('drop', function () {
-            const urls = Array.from(this.querySelectorAll('.draggable-item')).map(item => item.dataset.url);
-            const groupId = this.dataset.groupId;
+        group.addEventListener('drop', () => {
+            const urls = Array.from(group.querySelectorAll('.draggable-item'))
+                              .map(el => el.dataset.url);
+            const groupId = group.dataset.groupId;
 
             fetch('save_sort_order.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ group_id: groupId, new_order: urls })
-            })
-            .then(res => res.ok ? console.log('Sort order saved') : console.error('Failed to save sort order'))
-            .catch(err => console.error(err));
+            }).then(res => {
+                if (!res.ok) console.error('Failed to save order');
+            });
         });
     });
 
     function getDragAfterElement(container, y) {
-        const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
-
-        return draggableElements.reduce((closest, child) => {
-            const box = child.getBoundingClientRect();
+        const items = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+        return items.reduce((closest, item) => {
+            const box = item.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
-            return offset < 0 && offset > closest.offset
-                ? { offset, element: child }
+            return (offset < 0 && offset > closest.offset) 
+                ? { offset, element: item }
                 : closest;
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
