@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/functions.php';
 
 $page_title = $page_title ?? DEFAULT_TITLE;
