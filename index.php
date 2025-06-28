@@ -16,7 +16,7 @@ require_once 'includes/header.php';
 <div id="group-container" class="row sortable-groups" data-csrf="<?= e(generate_csrf_token()) ?>">
     <?php foreach ($data as $group): ?>
         <div class="col-md-6 mb-4 group-card" data-group-id="<?= e($group['id']) ?>">
-            <div class="card shadow h-100">
+            <div class="card shadow">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <strong><?= e($group['name']) ?></strong>
                     <div>

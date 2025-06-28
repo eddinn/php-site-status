@@ -10,13 +10,13 @@ $date_str = date('d/m/Y');
     </footer>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Bootstrap bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- Core scripts -->
+<!-- Core site logic -->
 <script src="assets/script.js" defer></script>
 
-<!-- Drag and drop (SortableJS + custom logic) -->
+<!-- Drag & Sort -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="assets/drag.js" defer></script>
 

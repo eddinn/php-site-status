@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (groupContainer) {
         new Sortable(groupContainer, {
             animation: 150,
-            handle: '.card-header',
             onEnd: () => {
                 const groupIds = Array.from(groupContainer.querySelectorAll('.group-card'))
                     .map(card => card.dataset.groupId);
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: new URLSearchParams({
                         group_ids: groupIds
                     })
-                }).catch(err => console.error('Group order save failed', err));
+                }).catch(err => console.error('Group order save failed:', err));
             }
         });
     }
@@ -29,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupId = ul.dataset.groupId;
         new Sortable(ul, {
             animation: 150,
-            handle: '.service-title-row',
             onEnd: () => {
                 const indexes = Array.from(ul.querySelectorAll('.service-item'))
                     .map(li => li.dataset.serviceIndex);
@@ -43,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         group_id: groupId,
                         service_order: indexes
                     })
-                }).catch(err => console.error('Service sort save failed', err));
+                }).catch(err => console.error('Service sort save failed:', err));
             }
         });
     });
