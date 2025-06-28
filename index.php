@@ -1,5 +1,6 @@
 <?php
 require_once 'includes/functions.php';
+require_once 'config.php';
 session_start();
 
 $data = load_data();
@@ -27,7 +28,7 @@ require_once 'includes/header.php';
                         <?php $online = check_url($service['url']); ?>
                         <li class="list-group-item">
                             <div class="service-title-row">
-                                <strong><?= e($service['title']) ?></strong>
+                                <strong><?= e($service['title'] ?? 'Unnamed Service') ?></strong>
                                 <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
                                     <?= $online ? 'Online' : 'Offline' ?>
                                 </span>

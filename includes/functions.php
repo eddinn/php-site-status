@@ -4,26 +4,22 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 
-// Load JSON file
 function load_data(): array {
     $path = realpath(__DIR__ . '/../data.json');
     if (!file_exists($path)) return [];
     return json_decode(file_get_contents($path), true) ?? [];
 }
 
-// Save JSON file
 function save_data(array $data): bool {
     $path = realpath(__DIR__ . '/../data.json');
     if (!$path) $path = __DIR__ . '/../data.json';
     return file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT)) !== false;
 }
 
-// Sanitize output
-function e(string $text): string {
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+function e($text): string {
+    return htmlspecialchars((string)$text, ENT_QUOTES, 'UTF-8');
 }
 
-// Generate CSRF token
 function generate_csrf_token(): string {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -31,12 +27,10 @@ function generate_csrf_token(): string {
     return $_SESSION['csrf_token'];
 }
 
-// Validate CSRF token
 function validate_csrf_token(string $token): bool {
     return hash_equals($_SESSION['csrf_token'] ?? '', $token);
 }
 
-// Check if service is online (status 200–399 = online)
 function check_url(string $url): bool {
     static $client = null;
     if (!$client) {
@@ -56,12 +50,10 @@ function check_url(string $url): bool {
     }
 }
 
-// Show flash message
 function flash(string $msg, string $type = 'info'): void {
     $_SESSION['flash'][] = ['msg' => $msg, 'type' => $type];
 }
 
-// Display and clear flash messages
 function show_flash(): void {
     if (empty($_SESSION['flash'])) return;
     foreach ($_SESSION['flash'] as $f) {
@@ -73,7 +65,6 @@ function show_flash(): void {
     unset($_SESSION['flash']);
 }
 
-// Version info for footer
 function get_version_info(): string {
     $git_head = trim(@shell_exec('git rev-parse --short HEAD')) ?: 'unknown';
     $version = '1.0.1';
