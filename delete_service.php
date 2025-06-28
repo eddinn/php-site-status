@@ -9,7 +9,7 @@ $csrf_token = $_GET['csrf'] ?? '';
 $page_title = "Delete Service";
 
 if (!validate_csrf_token($csrf_token)) {
-    set_flash("Invalid CSRF token.", 'danger');
+    flash("Invalid CSRF token.", 'danger');
 } else {
     $group_index = -1;
     foreach ($groups as $i => $group) {
@@ -25,9 +25,9 @@ if (!validate_csrf_token($csrf_token)) {
     ) {
         array_splice($groups[$group_index]['services'], $service_index, 1);
         save_data($groups);
-        set_flash("Service deleted successfully.");
+        flash("Service deleted successfully.");
     } else {
-        set_flash("Invalid group or service reference.", 'danger');
+        flash("Invalid group or service reference.", 'danger');
     }
 }
 
