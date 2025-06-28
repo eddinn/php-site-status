@@ -1,45 +1,49 @@
 <?php
 require_once 'includes/functions.php';
+session_start();
 
-$groups = load_data();
+$data = load_data();
+$csrf = generate_csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
-        flash("Invalid CSRF token.", 'danger');
-        header('Location: index.php');
+        flash('Invalid CSRF token.', 'danger');
+        header("Refresh: 2; URL=index.php");
         exit;
     }
 
     $name = trim($_POST['name'] ?? '');
-
     if ($name === '') {
-        flash("Group name cannot be empty.", 'danger');
+        flash('Group name is required.', 'danger');
     } else {
-        $groups[] = [
-            'id' => uniqid('group'),
+        $new_group = [
+            'id' => 'group' . uniqid(),
             'name' => $name,
             'services' => []
         ];
-        save_data($groups);
-        flash("Group \"$name\" added successfully.");
+        $data[] = $new_group;
+        save_data($data);
+        flash('Group added successfully.', 'success');
         header('Location: index.php');
         exit;
     }
 }
 
-$csrf = generate_csrf_token();
 $page_title = "Add Group";
 require_once 'includes/header.php';
 ?>
 
-<h3>Add New Service Group</h3>
-<form method="POST" class="mt-3">
-    <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+<h2>Add New Service Group</h2>
+
+<form method="post" class="mt-4">
+    <input type="hidden" name="csrf_token" value="<?= e($csrf) ?>">
+
     <div class="mb-3">
         <label for="name" class="form-label">Group Name</label>
-        <input type="text" name="name" id="name" class="form-control" required>
+        <input type="text" class="form-control" id="name" name="name" required>
     </div>
-    <button type="submit" class="btn btn-success">Create Group</button>
+
+    <button type="submit" class="btn btn-primary">Create Group</button>
     <a href="index.php" class="btn btn-secondary">Cancel</a>
 </form>
 

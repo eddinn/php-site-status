@@ -8,9 +8,10 @@ $page_title = "Dashboard";
 require_once 'includes/header.php';
 ?>
 
-<h2>Service Dashboard</h2>
-
-<?php show_flash(); ?>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Service Dashboard</h2>
+    <a href="add_group.php" class="btn btn-sm btn-success">+ Add Group</a>
+</div>
 
 <div class="row">
     <?php foreach ($data as $group): ?>
@@ -27,15 +28,15 @@ require_once 'includes/header.php';
                     <?php foreach ($group['services'] as $index => $service): ?>
                         <?php $online = check_url($service['url']); ?>
                         <li class="list-group-item">
-                            <div class="service-title-row">
+                            <div class="service-title-row d-flex justify-content-between align-items-center">
                                 <strong><?= e($service['title'] ?? 'Unnamed Service') ?></strong>
                                 <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
                                     <?= $online ? 'Online' : 'Offline' ?>
                                 </span>
                             </div>
                             <div><a href="<?= e($service['url']) ?>" target="_blank"><?= e($service['url']) ?></a></div>
-                            <div class="service-controls">
-                                <a href="edit_service.php?group_id=<?= e($group['id']) ?>&service_index=<?= e($index) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <div class="service-controls mt-2">
+                                <a href="edit_service.php?group_id=<?= e($group['id']) ?>&service_index=<?= e($index) ?>" class="btn btn-sm btn-outline-secondary me-2">Edit</a>
                                 <a href="delete_service.php?group_id=<?= e($group['id']) ?>&service_index=<?= e($index) ?>&csrf_token=<?= e(generate_csrf_token()) ?>" class="btn btn-sm btn-outline-danger">Delete</a>
                             </div>
                         </li>
