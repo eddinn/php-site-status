@@ -13,10 +13,10 @@ require_once 'includes/header.php';
     <a href="add_group.php" class="btn btn-sm btn-success">+ Add Group</a>
 </div>
 
-<div class="row">
+<div id="group-container" class="row sortable-groups" data-csrf="<?= e(generate_csrf_token()) ?>">
     <?php foreach ($data as $group): ?>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow">
+        <div class="col-md-6 mb-4 group-card" data-group-id="<?= e($group['id']) ?>">
+            <div class="card shadow h-100">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <strong><?= e($group['name']) ?></strong>
                     <div>
@@ -24,10 +24,10 @@ require_once 'includes/header.php';
                         <a href="delete_group.php?id=<?= e($group['id']) ?>&csrf_token=<?= e(generate_csrf_token()) ?>" class="btn btn-sm btn-outline-danger">Delete</a>
                     </div>
                 </div>
-                <ul class="list-group list-group-flush">
+                <ul class="list-group list-group-flush sortable-services" data-group-id="<?= e($group['id']) ?>">
                     <?php foreach ($group['services'] as $index => $service): ?>
                         <?php $online = check_url($service['url']); ?>
-                        <li class="list-group-item">
+                        <li class="list-group-item service-item" data-service-index="<?= $index ?>">
                             <div class="service-title-row d-flex justify-content-between align-items-center">
                                 <strong><?= e($service['title'] ?? 'Unnamed Service') ?></strong>
                                 <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">

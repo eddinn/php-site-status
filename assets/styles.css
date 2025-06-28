@@ -45,7 +45,8 @@ body.dark-mode {
 }
 
 .dark-mode footer,
-.dark-mode footer small {
+.dark-mode footer small,
+.dark-mode .text-footer {
     color: #e0e0e0 !important;
 }
 
@@ -86,6 +87,20 @@ footer {
 .service-controls .btn {
     padding: 0.15rem 0.4rem;
     font-size: 0.75rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.5em;
+    white-space: nowrap;
+}
+
+.text-footer {
+    color: #777;
+}
+
+.dark-mode .text-footer {
+    color: #ccc !important;
 }
 
 @media (max-width: 768px) {

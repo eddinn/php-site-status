@@ -4,13 +4,21 @@ $version = file_exists($version_file) ? trim(file_get_contents($version_file)) :
 $git_hash = trim(shell_exec('git rev-parse --short HEAD') ?? 'unknown');
 $date_str = date('d/m/Y');
 ?>
-    <footer class="text-center mt-5 text-muted small">
+    <footer class="text-center mt-5 small text-footer">
         <hr>
         Version: <?= e($version) ?> <?= e($git_hash) ?> — <?= e($date_str) ?>
     </footer>
 </div>
 
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Core scripts -->
 <script src="assets/script.js" defer></script>
+
+<!-- Drag and drop (SortableJS + custom logic) -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="assets/drag.js" defer></script>
+
 </body>
 </html>
