@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (groupContainer) {
         new Sortable(groupContainer, {
             animation: 150,
+            handle: '.drag-handle',
             onEnd: () => {
                 const groupIds = Array.from(groupContainer.querySelectorAll('.group-card'))
                     .map(card => card.dataset.groupId);
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const groupId = ul.dataset.groupId;
         new Sortable(ul, {
             animation: 150,
+            handle: '.drag-handle',
             onEnd: () => {
                 const indexes = Array.from(ul.querySelectorAll('.service-item'))
                     .map(li => li.dataset.serviceIndex);

@@ -44,14 +44,18 @@ body.dark-mode {
     color: #a0c5e8;
 }
 
+footer {
+    background-color: transparent;
+}
+
 .dark-mode footer,
 .dark-mode footer small,
 .dark-mode .text-footer {
     color: #e0e0e0 !important;
 }
 
-footer {
-    background-color: transparent;
+.text-footer {
+    color: #777;
 }
 
 .alert-container {
@@ -65,9 +69,17 @@ footer {
 
 .drag-handle {
     cursor: move;
+}
+
+.drag-icon {
+    cursor: move;
+    user-select: none;
     font-size: 1.2rem;
-    line-height: 1.5;
-    margin-right: 0.5rem;
+    color: #888;
+}
+
+.dark-mode .drag-icon {
+    color: #bbb;
 }
 
 .service-title-row {
@@ -93,14 +105,6 @@ footer {
     font-size: 0.75rem;
     padding: 0.35em 0.5em;
     white-space: nowrap;
-}
-
-.text-footer {
-    color: #777;
-}
-
-.dark-mode .text-footer {
-    color: #ccc !important;
 }
 
 @media (max-width: 768px) {

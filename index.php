@@ -17,8 +17,11 @@ require_once 'includes/header.php';
     <?php foreach ($data as $group): ?>
         <div class="col-md-6 mb-4 group-card" data-group-id="<?= e($group['id']) ?>">
             <div class="card shadow">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <strong><?= e($group['name']) ?></strong>
+                <div class="card-header d-flex justify-content-between align-items-center drag-handle">
+                    <div>
+                        <span class="drag-icon me-2">☰</span>
+                        <strong><?= e($group['name']) ?></strong>
+                    </div>
                     <div>
                         <a href="edit_group.php?id=<?= e($group['id']) ?>" class="btn btn-sm btn-outline-secondary">Edit</a>
                         <a href="delete_group.php?id=<?= e($group['id']) ?>&csrf_token=<?= e(generate_csrf_token()) ?>" class="btn btn-sm btn-outline-danger">Delete</a>
@@ -28,8 +31,11 @@ require_once 'includes/header.php';
                     <?php foreach ($group['services'] as $index => $service): ?>
                         <?php $online = check_url($service['url']); ?>
                         <li class="list-group-item service-item" data-service-index="<?= $index ?>">
-                            <div class="service-title-row d-flex justify-content-between align-items-center">
-                                <strong><?= e($service['title'] ?? 'Unnamed Service') ?></strong>
+                            <div class="service-title-row d-flex justify-content-between align-items-center drag-handle">
+                                <div>
+                                    <span class="drag-icon me-2">☰</span>
+                                    <strong><?= e($service['title'] ?? 'Unnamed Service') ?></strong>
+                                </div>
                                 <span class="badge bg-<?= $online ? 'success' : 'danger' ?>">
                                     <?= $online ? 'Online' : 'Offline' ?>
                                 </span>
