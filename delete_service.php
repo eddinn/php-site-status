@@ -8,7 +8,7 @@ $csrf_token = $_GET['csrf'] ?? '';
 
 $page_title = "Delete Service";
 
-if (!verify_csrf_token($csrf_token)) {
+if (!validate_csrf_token($csrf_token)) {
     set_flash("Invalid CSRF token.", 'danger');
 } else {
     $group_index = -1;
