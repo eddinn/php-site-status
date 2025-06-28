@@ -1,56 +1,61 @@
 <?php
 require_once 'includes/functions.php';
+session_start();
 
-$groups = load_data();
 $group_id = $_GET['group_id'] ?? '';
-$group_index = -1;
-
-foreach ($groups as $i => $group) {
-    if ($group['id'] === $group_id) {
-        $group_index = $i;
-        break;
-    }
-}
-
-if ($group_index === -1) {
-    set_flash("Invalid group ID.", 'danger');
-    header('Location: index.php');
-    exit;
-}
+$data = load_data();
+$csrf = generate_csrf_token();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        set_flash("Invalid CSRF token.", 'danger');
-        header("Location: index.php");
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        flash('Invalid CSRF token.', 'danger');
+        header("Refresh: 2; URL=index.php");
         exit;
     }
 
+    $title = trim($_POST['title'] ?? '');
     $url = trim($_POST['url'] ?? '');
+    $group_id = trim($_POST['group_id'] ?? '');
 
-    if (!is_valid_url($url)) {
-        set_flash("Invalid service URL.", 'danger');
+    if ($title === '' || $url === '') {
+        flash('Title and URL are required.', 'danger');
     } else {
-        $groups[$group_index]['services'][] = ['url' => $url];
-        save_data($groups);
-        set_flash("Service added successfully.");
-        header('Location: index.php');
-        exit;
+        foreach ($data as &$group) {
+            if ($group['id'] === $group_id) {
+                $group['services'][] = [
+                    'title' => $title,
+                    'url' => $url
+                ];
+                save_data($data);
+                flash('Service added successfully.', 'success');
+                header("Location: index.php");
+                exit;
+            }
+        }
+        flash('Group not found.', 'danger');
     }
 }
 
-$csrf = generate_csrf_token();
 $page_title = "Add Service";
-$group_name = $groups[$group_index]['name'];
 require_once 'includes/header.php';
 ?>
 
-<h3>Add Service to <em><?= e($group_name) ?></em></h3>
-<form method="POST" class="mt-3">
-    <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+<h2>Add Service</h2>
+
+<form method="post" class="mt-4">
+    <input type="hidden" name="csrf_token" value="<?= e($csrf) ?>">
+    <input type="hidden" name="group_id" value="<?= e($group_id) ?>">
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Service Name</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+
     <div class="mb-3">
         <label for="url" class="form-label">Service URL</label>
-        <input type="text" name="url" id="url" class="form-control" required>
+        <input type="url" class="form-control" id="url" name="url" required placeholder="http://example.local:port">
     </div>
+
     <button type="submit" class="btn btn-primary">Add Service</button>
     <a href="index.php" class="btn btn-secondary">Cancel</a>
 </form>

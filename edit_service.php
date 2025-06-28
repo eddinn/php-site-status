@@ -1,62 +1,79 @@
 <?php
 require_once 'includes/functions.php';
+session_start();
 
-$groups = load_data();
 $group_id = $_GET['group_id'] ?? '';
-$service_index = isset($_GET['service_index']) ? (int)$_GET['service_index'] : -1;
-$group_index = -1;
+$service_index = $_GET['service_index'] ?? null;
+$data = load_data();
+$csrf = generate_csrf_token();
 
-foreach ($groups as $i => $group) {
-    if ($group['id'] === $group_id) {
-        $group_index = $i;
+if (!isset($data) || !is_numeric($service_index)) {
+    flash('Invalid request.', 'danger');
+    header("Location: index.php");
+    exit;
+}
+
+$group = null;
+foreach ($data as &$g) {
+    if ($g['id'] === $group_id) {
+        $group = &$g;
         break;
     }
 }
 
-if (
-    $group_index === -1 ||
-    !isset($groups[$group_index]['services'][$service_index])
-) {
-    set_flash("Invalid group or service reference.", 'danger');
-    header('Location: index.php');
+if (!$group || !isset($group['services'][$service_index])) {
+    flash('Service not found.', 'danger');
+    header("Location: index.php");
     exit;
 }
 
-$current_url = $groups[$group_index]['services'][$service_index]['url'];
+$service = $group['services'][$service_index];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        set_flash("Invalid CSRF token.", 'danger');
-        header("Location: index.php");
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        flash('Invalid CSRF token.', 'danger');
+        header("Refresh: 2; URL=index.php");
         exit;
     }
 
-    $new_url = trim($_POST['url'] ?? '');
+    $title = trim($_POST['title'] ?? '');
+    $url = trim($_POST['url'] ?? '');
 
-    if (!is_valid_url($new_url)) {
-        set_flash("Invalid URL format.", 'danger');
+    if ($title === '' || $url === '') {
+        flash('Title and URL are required.', 'danger');
     } else {
-        $groups[$group_index]['services'][$service_index]['url'] = $new_url;
-        save_data($groups);
-        set_flash("Service updated successfully.");
-        header('Location: index.php');
+        $group['services'][$service_index] = [
+            'title' => $title,
+            'url' => $url
+        ];
+        save_data($data);
+        flash('Service updated successfully.', 'success');
+        header("Location: index.php");
         exit;
     }
 }
 
-$csrf = generate_csrf_token();
 $page_title = "Edit Service";
-$group_name = $groups[$group_index]['name'];
 require_once 'includes/header.php';
 ?>
 
-<h3>Edit Service in <em><?= e($group_name) ?></em></h3>
-<form method="POST" class="mt-3">
-    <input type="hidden" name="csrf_token" value="<?= $csrf ?>">
+<h2>Edit Service</h2>
+
+<form method="post" class="mt-4">
+    <input type="hidden" name="csrf_token" value="<?= e($csrf) ?>">
+    <input type="hidden" name="group_id" value="<?= e($group_id) ?>">
+    <input type="hidden" name="service_index" value="<?= e($service_index) ?>">
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Service Name</label>
+        <input type="text" class="form-control" id="title" name="title" required value="<?= e($service['title']) ?>">
+    </div>
+
     <div class="mb-3">
         <label for="url" class="form-label">Service URL</label>
-        <input type="text" name="url" id="url" class="form-control" required value="<?= e($current_url) ?>">
+        <input type="url" class="form-control" id="url" name="url" required value="<?= e($service['url']) ?>">
     </div>
+
     <button type="submit" class="btn btn-primary">Update Service</button>
     <a href="index.php" class="btn btn-secondary">Cancel</a>
 </form>

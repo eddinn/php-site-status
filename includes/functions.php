@@ -1,107 +1,82 @@
 <?php
-session_start();
-require_once __DIR__ . '/../config.php';  // Fixed path
+require_once __DIR__ . '/../vendor/autoload.php';
 
-/**
- * Load JSON data from configured file
- */
-function load_data($path = DATA_FILE) {
-    return file_exists($path) ? json_decode(file_get_contents($path), true) : [];
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+
+// Load JSON file
+function load_data(): array {
+    $path = realpath(__DIR__ . '/../data.json');
+    if (!file_exists($path)) return [];
+    return json_decode(file_get_contents($path), true) ?? [];
 }
 
-/**
- * Save JSON data to configured file
- */
-function save_data($data, $path = DATA_FILE) {
-    file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+// Save JSON file
+function save_data(array $data): bool {
+    $path = realpath(__DIR__ . '/../data.json');
+    if (!$path) $path = __DIR__ . '/../data.json';
+    return file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT)) !== false;
 }
 
-/**
- * Generate and store CSRF token
- */
-function generate_csrf_token() {
+// Sanitize output
+function e(string $text): string {
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+// Generate CSRF token
+function generate_csrf_token(): string {
     if (empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
     return $_SESSION['csrf_token'];
 }
 
-/**
- * Validate CSRF token
- */
-function verify_csrf_token($token) {
+// Validate CSRF token
+function validate_csrf_token(string $token): bool {
     return hash_equals($_SESSION['csrf_token'] ?? '', $token);
 }
 
-/**
- * Safely output HTML-escaped text
- */
-function e($string) {
-    return htmlspecialchars($string, ENT_QUOTES, 'UTF-8');
-}
-
-/**
- * Validate a service URL
- */
-function is_valid_url($url) {
-    return filter_var($url, FILTER_VALIDATE_URL) &&
-           preg_match('#^https?://#i', $url);
-}
-
-/**
- * Check service URL status and fetch title
- */
-function check_url($url) {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 5,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HEADER => false,
-        CURLOPT_NOBODY => false,
-    ]);
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $title = "No Title Found";
-
-    if ($http_code === 200 && preg_match("/<title>(.*?)<\/title>/i", $response, $matches)) {
-        $title = $matches[1];
+// Check if service is online (status 200–399 = online)
+function check_url(string $url): bool {
+    static $client = null;
+    if (!$client) {
+        $client = new Client([
+            'timeout' => 10,
+            'verify' => false,
+            'allow_redirects' => true,
+        ]);
     }
 
-    curl_close($ch);
-    return [$http_code === 200, $title];
-}
-
-/**
- * Set flash message
- */
-function set_flash($msg, $type = 'success') {
-    $_SESSION['flash'] = ['msg' => $msg, 'type' => $type];
-}
-
-/**
- * Display and clear flash message
- */
-function show_flash() {
-    if (!empty($_SESSION['flash'])) {
-        $msg = $_SESSION['flash']['msg'];
-        $type = $_SESSION['flash']['type'];
-        unset($_SESSION['flash']);
-        return "<div class=\"alert alert-$type alert-dismissible fade show\" role=\"alert\">"
-             . e($msg)
-             . "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>"
-             . "</div>";
+    try {
+        $response = $client->request('GET', $url, ['http_errors' => false]);
+        $status = $response->getStatusCode();
+        return $status >= 200 && $status < 400;
+    } catch (GuzzleException $e) {
+        return false;
     }
-    return '';
 }
 
-/**
- * Return version info: version string, short Git hash, and today's date
- */
-function get_version_info() {
-    $version = file_exists(VERSION_FILE) ? trim(file_get_contents(VERSION_FILE)) : '0.0.1';
-    $git_hash = trim(shell_exec('git rev-parse --short HEAD') ?? 'unknown');
-    $date_str = date('d/m/Y');
-    return "Version: " . e($version) . " " . e($git_hash) . " — " . e($date_str);
+// Show flash message
+function flash(string $msg, string $type = 'info'): void {
+    $_SESSION['flash'][] = ['msg' => $msg, 'type' => $type];
+}
+
+// Display and clear flash messages
+function show_flash(): void {
+    if (empty($_SESSION['flash'])) return;
+    foreach ($_SESSION['flash'] as $f) {
+        echo "<div class=\"alert alert-{$f['type']} alert-dismissible fade show\" role=\"alert\">";
+        echo e($f['msg']);
+        echo "<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>";
+        echo "</div>";
+    }
+    unset($_SESSION['flash']);
+}
+
+// Version info for footer
+function get_version_info(): string {
+    $git_head = trim(@shell_exec('git rev-parse --short HEAD')) ?: 'unknown';
+    $version = '1.0.1';
+    $date = date('d/m/Y');
+    return "Version: $version $git_head — $date";
 }
