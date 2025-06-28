@@ -7,8 +7,8 @@ $csrf_token = $_GET['csrf'] ?? '';
 
 $page_title = "Delete Group";
 
-if (!verify_csrf_token($csrf_token)) {
-    set_flash("Invalid CSRF token.", 'danger');
+if (!validate_csrf_token($csrf_token)) {
+    flash("Invalid CSRF token.", 'danger');
 } else {
     $updated_groups = [];
     $found = false;
@@ -23,9 +23,9 @@ if (!verify_csrf_token($csrf_token)) {
 
     if ($found) {
         save_data($updated_groups);
-        set_flash("Group deleted successfully.");
+        flash("Group deleted successfully.");
     } else {
-        set_flash("Group not found.", 'warning');
+        flash("Group not found.", 'warning');
     }
 }
 

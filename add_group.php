@@ -4,8 +4,8 @@ require_once 'includes/functions.php';
 $groups = load_data();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        set_flash("Invalid CSRF token.", 'danger');
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        flash("Invalid CSRF token.", 'danger');
         header('Location: index.php');
         exit;
     }
@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
 
     if ($name === '') {
-        set_flash("Group name cannot be empty.", 'danger');
+        flash("Group name cannot be empty.", 'danger');
     } else {
         $groups[] = [
             'id' => uniqid('group'),
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'services' => []
         ];
         save_data($groups);
-        set_flash("Group \"$name\" added successfully.");
+        flash("Group \"$name\" added successfully.");
         header('Location: index.php');
         exit;
     }

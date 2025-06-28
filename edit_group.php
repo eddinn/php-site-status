@@ -13,14 +13,14 @@ foreach ($groups as $i => $group) {
 }
 
 if ($group_index === -1) {
-    set_flash("Group not found.", 'danger');
+    flash("Group not found.", 'danger');
     header('Location: index.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
-        set_flash("Invalid CSRF token.", 'danger');
+    if (!validate_csrf_token($_POST['csrf_token'] ?? '')) {
+        flash("Invalid CSRF token.", 'danger');
         header('Location: index.php');
         exit;
     }
@@ -28,11 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_name = trim($_POST['name'] ?? '');
 
     if ($new_name === '') {
-        set_flash("Group name cannot be empty.", 'danger');
+        flash("Group name cannot be empty.", 'danger');
     } else {
         $groups[$group_index]['name'] = $new_name;
         save_data($groups);
-        set_flash("Group renamed successfully.");
+        flash("Group renamed successfully.");
         header('Location: index.php');
         exit;
     }
